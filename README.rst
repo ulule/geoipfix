@@ -23,7 +23,7 @@ Build it
 
 4. Run ``make build``
 
-You have now a binary version of picfit in the ``bin`` directory which
+You have now a binary version of ipfix in the ``bin`` directory which
 fits perfectly with your architecture.
 
 

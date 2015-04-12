@@ -20,7 +20,7 @@ build:
 	@(echo "-> Compiling ipfix binary")
 	@(mkdir -p $(BIN_DIR))
 	@(godep go build -o $(BIN_DIR)/picfit)
-	@(echo "-> picfit binary created")
+	@(echo "-> ipfix binary created")
 
 format:
 	@(go fmt ./...)
