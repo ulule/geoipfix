@@ -55,7 +55,7 @@ func Run(config string) error {
 	allowedOrigins, _ := app.Jq.ArrayOfStrings("allowed_origins")
 	allowedMethods, _ := app.Jq.ArrayOfStrings("allowed_methods")
 
-	n := negroni.Classic()
+	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
 	n.UseHandler(mux)
 	n.Use(cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
