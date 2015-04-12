@@ -86,7 +86,28 @@ To see a list of all available options, run:
 
     $ ipfix --help
 
+Development
+===========
+
+I recommend to install the live reload utility gin_ to make your life easier.
+
+Install it:
+
+::
+
+    $ go get github.com/codegangsta/gin
+
+Then launch it in the ipfix directory:
+
+::
+
+    $ IPFIX_CONFIG_PATH=config.json gin run
+
+When using gin_, your server must be listening on ``:3001``.
+
+
 .. _GOPATH: http://golang.org/doc/code.html#GOPATH
 .. _GeoLite: http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
 .. _freegeoip: https://github.com/fiorix/freegeoip
 .. _maxmind: https://www.maxmind.com/fr/home
+.. _gin: https://github.com/codegangsta/gin
