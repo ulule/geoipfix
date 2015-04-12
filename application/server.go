@@ -24,6 +24,18 @@ func Run(config string) error {
 		return err
 	}
 
+	databasePath, err := app.Jq.String("database_path")
+
+	if err != nil {
+		databasePath = DatabaseURL
+	}
+
+	db, err := openDB(databasePath, UpdateInterval, RetryInterval)
+
+	if err != nil {
+		return err
+	}
+
 	mux := http.NewServeMux()
 
 	middleware := stats.New()
@@ -37,18 +49,6 @@ func Run(config string) error {
 
 		w.Write(b)
 	})
-
-	databasePath, err := app.Jq.String("database_path")
-
-	if err != nil {
-		databasePath = DatabaseURL
-	}
-
-	db, err := openDB(databasePath, UpdateInterval, RetryInterval)
-
-	if err != nil {
-		return err
-	}
 
 	mux.Handle("/json/", freegeoip.NewHandler(db, &freegeoip.JSONEncoder{}))
 
