@@ -46,6 +46,23 @@ Configuration should be stored in a readable file and in JSON format.
 You should download first locally the GeoLite_ database because the service
 will be unavailable until it will download the database.
 
+CORS
+====
+
+ipfix supports CORS headers customization in your config file.
+
+To enable this feature, set ``allowed_origins`` and ``allowed_methods``,
+for example:
+
+``config.json``
+
+.. code-block:: json
+
+    {
+      "allowed_origins": ["*.ulule.com"],
+      "allowed_methods": ["GET", "HEAD"]
+    }
+
 Usage
 =====
 
