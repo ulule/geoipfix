@@ -3,6 +3,11 @@
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.6.1-10-g6c28e16",
+			"Rev": "6c28e16200e55c2549705ac24ea58976c07f18ac"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-26-gf7ebb76",
 			"Rev": "f7ebb761e83e21225d1d8954fde853bf8edd46c4"
@@ -25,6 +30,10 @@
 		{
 			"ImportPath": "github.com/jmoiron/jsonq",
 			"Rev": "7c27c8eb9f6831555a4209f6a7d579159e766a3c"
+		},
+		{
+			"ImportPath": "github.com/meatballhat/negroni-logrus",
+			"Rev": "d5e114d7a445f7a3652cf807d3f83d5dceb8de26"
 		},
 		{
 			"ImportPath": "github.com/oschwald/maxminddb-golang",

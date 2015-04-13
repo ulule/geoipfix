@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/codegangsta/negroni"
 	"github.com/fiorix/freegeoip"
+	"github.com/meatballhat/negroni-logrus"
 	"github.com/rs/cors"
 	"github.com/thoas/stats"
 	"github.com/tylerb/graceful"
@@ -55,7 +56,7 @@ func Run(config string) error {
 	allowedOrigins, _ := app.Jq.ArrayOfStrings("allowed_origins")
 	allowedMethods, _ := app.Jq.ArrayOfStrings("allowed_methods")
 
-	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
+	n := negroni.New(negroni.NewRecovery(), negronilogrus.NewMiddleware())
 	n.UseHandler(mux)
 	n.Use(cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
