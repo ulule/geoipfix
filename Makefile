@@ -11,7 +11,7 @@ unit:
 deps:
 	godep save ./...
 
-all: picfit
+all: ipfix
 	@(mkdir -p $(BIN_DIR))
 
 build:
@@ -19,7 +19,7 @@ build:
 	@(godep restore)
 	@(echo "-> Compiling ipfix binary")
 	@(mkdir -p $(BIN_DIR))
-	@(godep go build -o $(BIN_DIR)/picfit)
+	@(godep go build -o $(BIN_DIR)/ipfix)
 	@(echo "-> ipfix binary created")
 
 format:
