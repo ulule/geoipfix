@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/codegangsta/negroni"
 	"github.com/fiorix/freegeoip"
-	"github.com/meatballhat/negroni-logrus"
 	"github.com/rs/cors"
 	"github.com/thoas/stats"
 	"github.com/tylerb/graceful"
+	"github.com/ulule/ipfix/middleware"
 	"net/http"
 	"net/url"
 	"runtime"
@@ -39,12 +39,12 @@ func Run(config string) error {
 
 	mux := http.NewServeMux()
 
-	middleware := stats.New()
+	s := stats.New()
 
 	mux.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		stats := middleware.Data()
+		stats := s.Data()
 
 		b, _ := json.Marshal(stats)
 
@@ -56,7 +56,7 @@ func Run(config string) error {
 	allowedOrigins, _ := app.Jq.ArrayOfStrings("allowed_origins")
 	allowedMethods, _ := app.Jq.ArrayOfStrings("allowed_methods")
 
-	n := negroni.New(negroni.NewRecovery(), negronilogrus.NewMiddleware(), middleware)
+	n := negroni.New(negroni.NewRecovery(), middleware.NewLogrusMiddleware(), s)
 	n.UseHandler(mux)
 	n.Use(cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
