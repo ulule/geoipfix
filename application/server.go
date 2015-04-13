@@ -50,7 +50,7 @@ func Run(config string) error {
 		w.Write(b)
 	})
 
-	mux.Handle("/json/", freegeoip.NewHandler(db, &freegeoip.JSONEncoder{}))
+	mux.Handle("/json/", freegeoip.ProxyHandler(freegeoip.NewHandler(db, &freegeoip.JSONEncoder{})))
 
 	allowedOrigins, _ := app.Jq.ArrayOfStrings("allowed_origins")
 	allowedMethods, _ := app.Jq.ArrayOfStrings("allowed_methods")
