@@ -22,6 +22,12 @@ build:
 	@(godep go build -o $(BIN_DIR)/ipfix)
 	@(echo "-> ipfix binary created")
 
+build-static:
+	@(echo "-> Creating statically linked binary...")
+	@(go get github.com/tools/godep)
+	mkdir -p $(BIN_DIR)
+	CGO_ENABLED=0 godep go build -a -installsuffix cgo -o $(BIN_DIR)/ulule-api
+
 format:
 	@(go fmt ./...)
 	@(go vet ./...)
