@@ -1,0 +1,37 @@
+hash: 29ea9b1a7225cac2fd2bc66a0332ebcbc8f38573d7d5d93cfb231dd362d1eadb
+updated: 2016-09-26T22:55:12.543090742+02:00
+imports:
+- name: github.com/codegangsta/cli
+  version: f7ebb761e83e21225d1d8954fde853bf8edd46c4
+- name: github.com/codegangsta/negroni
+  version: ae96f1c1ac9eb11be7dff4fe4cb42f6846b93d77
+- name: github.com/fiorix/freegeoip
+  version: 8b86589c43087fce011fbeaaa4a96da374fcf022
+- name: github.com/howeyc/fsnotify
+  version: 6b1ef893dc11e0447abda6da20a5203481878dda
+- name: github.com/jmoiron/jsonq
+  version: 7c27c8eb9f6831555a4209f6a7d579159e766a3c
+- name: github.com/oschwald/maxminddb-golang
+  version: 339f38bd3d04f4a2d842b63c35db8e62eb616618
+- name: github.com/robertkrimen/otto
+  version: d1b4d8ef0e0e4b088c8328c95ca63ab9ebd8fc9d
+  subpackages:
+  - ast
+  - dbg
+  - file
+  - parser
+  - registry
+  - token
+- name: github.com/rs/cors
+  version: 2d3baec0901daab5cc25673fb44388add33de30b
+- name: github.com/Sirupsen/logrus
+  version: 6c28e16200e55c2549705ac24ea58976c07f18ac
+- name: github.com/thoas/stats
+  version: 6e037cd1c2e122afc99d4f9cb47c2c8d158ccdbd
+- name: github.com/tylerb/graceful
+  version: d506b859c378b0e4a1b16d44021f3937f9ba4578
+- name: golang.org/x/net
+  version: 7dbad50ab5b31073856416cdcfeb2796d682f844
+  subpackages:
+  - netutil
+testImports: []

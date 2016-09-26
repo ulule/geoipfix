@@ -1,6 +1,4 @@
-FROM golang:1.5.1
-
-ENV GO15VENDOREXPERIMENT 1
+FROM golang:1.7.1
 
 ADD . /go/src/github.com/ulule/ipfix
 
