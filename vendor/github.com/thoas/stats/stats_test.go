@@ -2,10 +2,12 @@ package stats
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +39,7 @@ func TestGetStats(t *testing.T) {
 
 		w.Write(b)
 		w.WriteHeader(200)
-		w.Header().Add("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json")
 	})
 
 	res := httptest.NewRecorder()
@@ -58,5 +60,43 @@ func TestGetStats(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	assert.Equal(t, data["total_count"].(float64), 1)
+	assert.Equal(t, data["total_count"].(float64), float64(1))
+}
+
+func TestRace(t *testing.T) {
+	s := New()
+
+	ch1 := make(chan bool)
+	ch2 := make(chan bool)
+
+	go func() {
+		now := time.Now()
+		for true {
+			select {
+			case _ = <-ch1:
+				return
+			default:
+				s.EndWithStatus(now, 200)
+
+			}
+		}
+
+	}()
+
+	go func() {
+		dt := s.Data()
+		for true {
+			select {
+			case _ = <-ch2:
+				return
+			default:
+				_ = dt.TotalStatusCodeCount["200"]
+			}
+		}
+	}()
+
+	time.Sleep(time.Second)
+
+	ch1 <- true
+	ch2 <- true
 }

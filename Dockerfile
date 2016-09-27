@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD bin/ipfix /ulule-api
+ADD bin/ipfix /ipfix
 
 CMD ["/ipfix"]

@@ -1,27 +1,25 @@
 package: github.com/ulule/ipfix
 import:
 - package: github.com/Sirupsen/logrus
-  version: 6c28e16200e55c2549705ac24ea58976c07f18ac
+  version: v0.10.0
 - package: github.com/codegangsta/cli
-  version: f7ebb761e83e21225d1d8954fde853bf8edd46c4
+  version: v1.18.1
 - package: github.com/codegangsta/negroni
-  version: ae96f1c1ac9eb11be7dff4fe4cb42f6846b93d77
+  version: v0.2.0
 - package: github.com/fiorix/freegeoip
   version: 8b86589c43087fce011fbeaaa4a96da374fcf022
 - package: github.com/howeyc/fsnotify
   version: 6b1ef893dc11e0447abda6da20a5203481878dda
 - package: github.com/jmoiron/jsonq
-  version: 7c27c8eb9f6831555a4209f6a7d579159e766a3c
+  version: e874b168d07ecc7808bc950a17998a8aa3141d82
 - package: github.com/oschwald/maxminddb-golang
-  version: 339f38bd3d04f4a2d842b63c35db8e62eb616618
-- package: github.com/robertkrimen/otto
-  version: d1b4d8ef0e0e4b088c8328c95ca63ab9ebd8fc9d
+  version: 2af0544f8e032bc7a363e897fbd9c6ed4884a1d6
 - package: github.com/rs/cors
-  version: 2d3baec0901daab5cc25673fb44388add33de30b
+  version: a62a804a8a009876ca59105f7899938a1349f4b3
 - package: github.com/thoas/stats
-  version: 6e037cd1c2e122afc99d4f9cb47c2c8d158ccdbd
+  version: 152b5d051953fdb6e45f14b6826962aadc032324
 - package: github.com/tylerb/graceful
-  version: ~1.0.0
+  version: v1.2.13
 - package: golang.org/x/net
   version: 7dbad50ab5b31073856416cdcfeb2796d682f844
   subpackages:

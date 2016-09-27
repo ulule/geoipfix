@@ -1,10 +1,19 @@
 package cors
 
-import (
-	"strings"
-)
+import "strings"
+
+const toLower = 'a' - 'A'
 
 type converter func(string) string
+
+type wildcard struct {
+	prefix string
+	suffix string
+}
+
+func (w wildcard) match(s string) bool {
+	return len(s) >= len(w.prefix+w.suffix) && strings.HasPrefix(s, w.prefix) && strings.HasSuffix(s, w.suffix)
+}
 
 // convert converts a list of string using the passed converter function
 func convert(s []string, c converter) []string {
@@ -15,30 +24,47 @@ func convert(s []string, c converter) []string {
 	return out
 }
 
-func parseHeaderList(headerList string) (headers []string) {
-	for _, header := range strings.Split(headerList, ",") {
-		header = toHeader(header)
-		if header != "" {
-			headers = append(headers, header)
+// parseHeaderList tokenize + normalize a string containing a list of headers
+func parseHeaderList(headerList string) []string {
+	l := len(headerList)
+	h := make([]byte, 0, l)
+	upper := true
+	// Estimate the number headers in order to allocate the right splice size
+	t := 0
+	for i := 0; i < l; i++ {
+		if headerList[i] == ',' {
+			t++
+		}
+	}
+	headers := make([]string, 0, t)
+	for i := 0; i < l; i++ {
+		b := headerList[i]
+		if b >= 'a' && b <= 'z' {
+			if upper {
+				h = append(h, b-toLower)
+			} else {
+				h = append(h, b)
+			}
+		} else if b >= 'A' && b <= 'Z' {
+			if !upper {
+				h = append(h, b+toLower)
+			} else {
+				h = append(h, b)
+			}
+		} else if b == '-' || b == '_' || (b >= '0' && b <= '9') {
+			h = append(h, b)
+		}
+
+		if b == ' ' || b == ',' || i == l-1 {
+			if len(h) > 0 {
+				// Flush the found header
+				headers = append(headers, string(h))
+				h = h[:0]
+				upper = true
+			}
+		} else {
+			upper = b == '-' || b == '_'
 		}
 	}
 	return headers
-}
-
-// toHeader converts an arbitrary formatted string to a HTTP header formatted string
-// i.e.: my-header becomes My-Header
-func toHeader(header string) string {
-	chunks := strings.Split(strings.TrimSpace(header), "")
-	upNext := true
-	for pos, char := range chunks {
-		if upNext {
-			chunks[pos] = strings.ToUpper(char)
-			upNext = false
-		} else if char == "-" {
-			upNext = true
-		} else {
-			chunks[pos] = strings.ToLower(char)
-		}
-	}
-	return strings.Join(chunks, "")
 }

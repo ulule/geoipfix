@@ -28,7 +28,11 @@ type beforeFunc func(ResponseWriter)
 
 // NewResponseWriter creates a ResponseWriter that wraps an http.ResponseWriter
 func NewResponseWriter(rw http.ResponseWriter) ResponseWriter {
-	return &responseWriter{rw, 0, 0, nil}
+	return &responseWriter{
+		ResponseWriter: rw,
+		status:         http.StatusOK,
+		size:           0,
+		beforeFuncs:    nil}
 }
 
 type responseWriter struct {
@@ -39,9 +43,9 @@ type responseWriter struct {
 }
 
 func (rw *responseWriter) WriteHeader(s int) {
+	rw.status = s
 	rw.callBefore()
 	rw.ResponseWriter.WriteHeader(s)
-	rw.status = s
 }
 
 func (rw *responseWriter) Write(b []byte) (int, error) {

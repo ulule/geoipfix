@@ -4,8 +4,4 @@ ADD . /go/src/github.com/ulule/ipfix
 
 WORKDIR /go/src/github.com/ulule/ipfix
 
-VOLUME ["/go/src/github.com/ulule/ipfix/bin"]
-
-RUN go get -v github.com/tools/godep
-
 CMD make build-static
