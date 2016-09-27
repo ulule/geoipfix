@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -18,8 +17,6 @@ import (
 
 // Run launchs the server with a config path
 func Run(config string) error {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	fmt.Println("Loading config from", config, "...")
 
 	jq, err := Load(config)
@@ -72,7 +69,7 @@ func Run(config string) error {
 		port = DefaultPort
 	}
 
-	fmt.Println("Listening to", port)
+	fmt.Println("HTTP Server is listening", port)
 
 	graceful.Run(fmt.Sprintf(":%s", strconv.Itoa(port)), 10*time.Second, n)
 
