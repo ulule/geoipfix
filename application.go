@@ -14,7 +14,7 @@ func Load(path string) (*jsonq.JsonQuery, error) {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		return nil, fmt.Errorf("Your config file %s cannot be loaded: %s", path, err)
+		return nil, fmt.Errorf("Config file %s cannot be loaded: %s", path, err)
 	}
 
 	return LoadFromContent(string(content))
@@ -27,7 +27,7 @@ func LoadFromContent(content string) (*jsonq.JsonQuery, error) {
 	err := dec.Decode(&data)
 
 	if err != nil {
-		return nil, fmt.Errorf("Your config file %s cannot be parsed: %s", content, err)
+		return nil, fmt.Errorf("Config file %s cannot be parsed: %s", content, err)
 	}
 
 	return jsonq.NewQuery(data), nil
