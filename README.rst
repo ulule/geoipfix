@@ -111,3 +111,10 @@ When using gin_, your server must be listening on ``:3001``.
 .. _freegeoip: https://github.com/fiorix/freegeoip
 .. _maxmind: https://www.maxmind.com/fr/home
 .. _gin: https://github.com/codegangsta/gin
+
+Dang, what's this name?
+=======================
+
+It was an initial proposal from `kyojin <https://github.com/kyojin>`_ based on `Idéfix <https://en.wikipedia.org/wiki/Dogmatix>`_.
+
+.. image:: https://media.giphy.com/media/Ob7p7lDT99cd2/giphy.gif
