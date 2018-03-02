@@ -70,13 +70,13 @@ When your configuration is done, you can start the service as follow:
 
 ::
 
-    $ ipfix -c config.json
+    ipfix -c config.json
 
 By default, this will run the application on port 3001 and can be accessed by visiting:
 
 ::
 
-    $ http://localhost:3001
+    http://localhost:3001
 
 The port number can be configured with ``port`` option in your config file.
 
@@ -84,33 +84,31 @@ To see a list of all available options, run:
 
 ::
 
-    $ ipfix --help
+    ipfix --help
 
 Development
 ===========
 
-I recommend to install the live reload utility gin_ to make your life easier.
+I recommend to install the live reload utility modd_ to make your life easier.
 
 Install it:
 
 ::
 
-    $ go get github.com/codegangsta/gin
+    go get github.com/cortesi/modd/cmd/modd
 
 Then launch it in the ipfix directory:
 
 ::
 
-    $ IPFIX_CONFIG_PATH=config.json gin run
-
-When using gin_, your server must be listening on ``:3001``.
+    IPFIX_CONF=config.json make live
 
 
 .. _GOPATH: http://golang.org/doc/code.html#GOPATH
 .. _GeoLite: http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
 .. _freegeoip: https://github.com/fiorix/freegeoip
 .. _maxmind: https://www.maxmind.com/fr/home
-.. _gin: https://github.com/codegangsta/gin
+.. _modd: https://github.com/cortesi/modd
 
 Dang, what's this name?
 =======================

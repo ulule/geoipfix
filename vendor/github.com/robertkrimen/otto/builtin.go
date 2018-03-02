@@ -18,7 +18,7 @@ func builtinGlobal_eval(call FunctionCall) Value {
 		return src
 	}
 	runtime := call.runtime
-	program := runtime.cmpl_parseOrThrow(src.string())
+	program := runtime.cmpl_parseOrThrow(src.string(), nil)
 	if !call.eval {
 		// Not a direct call to eval, so we enter the global ExecutionContext
 		runtime.enterGlobalScope()
@@ -70,7 +70,7 @@ func digitValue(chr rune) int {
 }
 
 func builtinGlobal_parseInt(call FunctionCall) Value {
-	input := strings.TrimSpace(call.Argument(0).string())
+	input := strings.Trim(call.Argument(0).string(), builtinString_trim_whitespace)
 	if len(input) == 0 {
 		return NaNValue()
 	}
@@ -153,13 +153,14 @@ var parseFloat_matchValid = regexp.MustCompile(`[0-9eE\+\-\.]|Infinity`)
 
 func builtinGlobal_parseFloat(call FunctionCall) Value {
 	// Caveat emptor: This implementation does NOT match the specification
-	input := strings.TrimSpace(call.Argument(0).string())
+	input := strings.Trim(call.Argument(0).string(), builtinString_trim_whitespace)
+
 	if parseFloat_matchBadSpecial.MatchString(input) {
 		return NaNValue()
 	}
 	value, err := strconv.ParseFloat(input, 64)
 	if err != nil {
-		for end := len(input); end > 0; end -= 1 {
+		for end := len(input); end > 0; end-- {
 			input := input[0:end]
 			if !parseFloat_matchValid.MatchString(input) {
 				return NaNValue()

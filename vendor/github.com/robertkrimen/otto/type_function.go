@@ -31,17 +31,47 @@ type _nativeFunction func(FunctionCall) Value
 
 type _nativeFunctionObject struct {
 	name      string
+	file      string
+	line      int
 	call      _nativeFunction    // [[Call]]
 	construct _constructFunction // [[Construct]]
 }
 
-func (runtime *_runtime) newNativeFunctionObject(name string, native _nativeFunction, length int) *_object {
+func (runtime *_runtime) _newNativeFunctionObject(name, file string, line int, native _nativeFunction, length int) *_object {
 	self := runtime.newClassObject("Function")
 	self.value = _nativeFunctionObject{
+		name:      name,
+		file:      file,
+		line:      line,
 		call:      native,
 		construct: defaultConstruct,
 	}
+	self.defineProperty("name", toValue_string(name), 0000, false)
 	self.defineProperty("length", toValue_int(length), 0000, false)
+	return self
+}
+
+func (runtime *_runtime) newNativeFunctionObject(name, file string, line int, native _nativeFunction, length int) *_object {
+	self := runtime._newNativeFunctionObject(name, file, line, native, length)
+	self.defineOwnProperty("caller", _property{
+		value: _propertyGetSet{
+			runtime._newNativeFunctionObject("get", "internal", 0, func(fc FunctionCall) Value {
+				for sc := runtime.scope; sc != nil; sc = sc.outer {
+					if sc.frame.fn == self {
+						if sc.outer == nil || sc.outer.frame.fn == nil {
+							return nullValue
+						}
+
+						return runtime.toValue(sc.outer.frame.fn)
+					}
+				}
+
+				return nullValue
+			}, 0),
+			&_nilGetSetObject,
+		},
+		mode: 0000,
+	}, false)
 	return self
 }
 
@@ -67,6 +97,7 @@ func (runtime *_runtime) newBoundFunctionObject(target *_object, this Value, arg
 	if length < 0 {
 		length = 0
 	}
+	self.defineProperty("name", toValue_string("bound "+target.get("name").String()), 0000, false)
 	self.defineProperty("length", toValue_int(length), 0000, false)
 	self.defineProperty("caller", Value{}, 0000, false)    // TODO Should throw a TypeError
 	self.defineProperty("arguments", Value{}, 0000, false) // TODO Should throw a TypeError
@@ -101,7 +132,27 @@ func (runtime *_runtime) newNodeFunctionObject(node *_nodeFunctionLiteral, stash
 		node:  node,
 		stash: stash,
 	}
+	self.defineProperty("name", toValue_string(node.name), 0000, false)
 	self.defineProperty("length", toValue_int(len(node.parameterList)), 0000, false)
+	self.defineOwnProperty("caller", _property{
+		value: _propertyGetSet{
+			runtime.newNativeFunction("get", "internal", 0, func(fc FunctionCall) Value {
+				for sc := runtime.scope; sc != nil; sc = sc.outer {
+					if sc.frame.fn == self {
+						if sc.outer == nil || sc.outer.frame.fn == nil {
+							return nullValue
+						}
+
+						return runtime.toValue(sc.outer.frame.fn)
+					}
+				}
+
+				return nullValue
+			}),
+			&_nilGetSetObject,
+		},
+		mode: 0000,
+	}, false)
 	return self
 }
 
@@ -125,11 +176,28 @@ func (self *_object) call(this Value, argumentList []Value, eval bool, frame _fr
 	switch fn := self.value.(type) {
 
 	case _nativeFunctionObject:
-		// TODO Enter a scope, name from the native object...
 		// Since eval is a native function, we only have to check for it here
 		if eval {
 			eval = self == self.runtime.eval // If eval is true, then it IS a direct eval
 		}
+
+		// Enter a scope, name from the native object...
+		rt := self.runtime
+		if rt.scope != nil && !eval {
+			rt.enterFunctionScope(rt.scope.lexical, this)
+			rt.scope.frame = _frame{
+				native:     true,
+				nativeFile: fn.file,
+				nativeLine: fn.line,
+				callee:     fn.name,
+				file:       nil,
+				fn:         self,
+			}
+			defer func() {
+				rt.leaveScope()
+			}()
+		}
+
 		return fn.call(FunctionCall{
 			runtime: self.runtime,
 			eval:    eval,
@@ -147,10 +215,14 @@ func (self *_object) call(this Value, argumentList []Value, eval bool, frame _fr
 	case _nodeFunctionObject:
 		rt := self.runtime
 		stash := rt.enterFunctionScope(fn.stash, this)
+		rt.scope.frame = _frame{
+			callee: fn.node.name,
+			file:   fn.node.file,
+			fn:     self,
+		}
 		defer func() {
 			rt.leaveScope()
 		}()
-		rt.scope.frame = frame
 		callValue := rt.cmpl_call_nodeFunction(self, stash, fn.node, this, argumentList)
 		if value, valid := callValue.value.(_result); valid {
 			return value.value
@@ -259,4 +331,10 @@ func (self *FunctionCall) thisClassObject(class string) *_object {
 
 func (self FunctionCall) toObject(value Value) *_object {
 	return self.runtime.toObject(value)
+}
+
+// CallerLocation will return file location information (file:line:pos) where this function is being called.
+func (self FunctionCall) CallerLocation() string {
+	// see error.go for location()
+	return self.runtime.scope.outer.frame.location()
 }

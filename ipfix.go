@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 // compilation variables.
@@ -19,7 +19,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ipfix"
 	app.Author = "thoas"
-	app.Email = "florent.messa@gmail.com"
+	app.Email = "florent@ulule.com"
 	app.Usage = "A webservice to retrieve geolocation information from an ip address"
 	app.Version = fmt.Sprintf("%s [git:%s:%s]\ncompiled using %s at %s)", Version, branch, sha, compiler, now)
 	app.Flags = []cli.Flag{

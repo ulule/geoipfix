@@ -1,4 +1,4 @@
-FROM scratch
+FROM stretch-slim
 
 ADD bin/ipfix /ipfix
 
