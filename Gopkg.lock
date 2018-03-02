@@ -4,7 +4,8 @@
 [[projects]]
   name = "github.com/fiorix/freegeoip"
   packages = ["."]
-  revision = "8b86589c43087fce011fbeaaa4a96da374fcf022"
+  revision = "989e6d4183f78c18a28964d4b204d91945e49934"
+  version = "v3.4.1"
 
 [[projects]]
   name = "github.com/go-chi/chi"
@@ -22,6 +23,18 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/go-chi/render"
+  packages = ["."]
+  revision = "9f855fadd4b8cde7773f9ef51f6b2705af239519"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/go-chi/valve"
+  packages = ["."]
+  revision = "9e45288364f420dd8e094fab4f64437fca5245a6"
+
+[[projects]]
   name = "github.com/howeyc/fsnotify"
   packages = ["."]
   revision = "6b1ef893dc11e0447abda6da20a5203481878dda"
@@ -37,20 +50,6 @@
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/robertkrimen/otto"
-  packages = [
-    ".",
-    "ast",
-    "dbg",
-    "file",
-    "parser",
-    "registry",
-    "token"
-  ]
-  revision = "3b44b4dcb6c00477273595c312908e2412d07da6"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -92,17 +91,19 @@
   revision = "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
 
 [[projects]]
-  name = "gopkg.in/sourcemap.v1"
+  name = "golang.org/x/text"
   packages = [
-    ".",
-    "base64vlq"
+    "internal/gen",
+    "internal/tag",
+    "language",
+    "unicode/cldr"
   ]
-  revision = "6e83acea0053641eff084973fee085f0c193c61a"
-  version = "v1.0.5"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "90f2d092141a7b4eff945ac83708bde598a777c33e3c4453da6a80d4048bec42"
+  inputs-digest = "cc3cefc1f08e22c52606da38f45b7b7fa76fbdbed33dac79fc1b072b8527677a"
   solver-name = "gps-cdcl"
   solver-version = 1

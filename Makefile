@@ -26,9 +26,6 @@ unit:
 all: ipfix
 	@(mkdir -p $(BIN_DIR))
 
-serve:
-	IPFIX_CONFIG_PATH=config.json gin run
-
 build:
 	@(echo "-> Compiling ipfix binary")
 	@(mkdir -p $(BIN_DIR))

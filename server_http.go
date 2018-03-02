@@ -1,14 +1,18 @@
 package ipfix
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"time"
 
-	"github.com/fiorix/freegeoip"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/valve"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +33,12 @@ func NewHTTPServer(cfg serverHTTPConfig, opts ...Option) *HTTPServer {
 	}
 }
 
+func (h *HTTPServer) handle(f Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		f(h.opt, w, r)
+	}
+}
+
 // Init initializes HTTPServer instance.
 func (h *HTTPServer) Init() error {
 	r := chi.NewRouter()
@@ -40,18 +50,15 @@ func (h *HTTPServer) Init() error {
 		AllowCredentials: h.cfg.Cors.AllowCredentials,
 		MaxAge:           h.cfg.Cors.MaxAge,
 	})
+	r.Use(middleware.RealIP)
 	r.Use(cors.Handler)
 	r.Use(middleware.RequestID)
 
-	geoipHandler := freegeoip.ProxyHandler(freegeoip.NewHandler(h.opt.DB, &freegeoip.JSONEncoder{}))
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		geoipHandler.ServeHTTP(w, r)
-	}
 	r.Get("/sys/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
-	r.Get("/json/{ipAddress}", handler)
-	r.Get("/json/", handler)
+	r.Get("/json/{ipAddress}", h.handle(IPAddressHandler))
+	r.Get("/json/", h.handle(IPAddressHandler))
 
 	h.mux = r
 
@@ -62,8 +69,41 @@ func (h *HTTPServer) Init() error {
 func (h *HTTPServer) Serve() error {
 	addr := fmt.Sprintf(":%s", strconv.Itoa(h.cfg.Port))
 
+	valv := valve.New()
+	baseCtx := valv.Context()
+
+	srv := http.Server{
+		Addr:    addr,
+		Handler: chi.ServerBaseContext(baseCtx, h.mux),
+	}
 	h.opt.Logger.Info("Launch HTTP server", zap.String("addr", addr))
 	defer h.opt.Logger.Sync()
 
-	return http.ListenAndServe(addr, h.mux)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			// sig is a ^C, handle it
+			h.opt.Logger.Info("shutting down..")
+
+			// first valv
+			valv.Shutdown(20 * time.Second)
+
+			// create context with timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+			defer cancel()
+
+			// start http shutdown
+			srv.Shutdown(ctx)
+
+			// verify, in worst case call cancel via defer
+			select {
+			case <-time.After(21 * time.Second):
+				h.opt.Logger.Info("not all connections have been closed")
+			case <-ctx.Done():
+
+			}
+		}
+	}()
+	return srv.ListenAndServe()
 }
