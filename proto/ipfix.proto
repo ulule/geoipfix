@@ -14,6 +14,6 @@ message GetLocationResponse {
   string ip_address = 1;
 }
 
-service IpfixService {
+service Ipfix {
   rpc GetLocation(GetLocationRequest) returns (GetLocationResponse) {}
 }
