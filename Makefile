@@ -11,6 +11,9 @@ compiler = $(shell go version)
 
 test: unit
 
+gen-proto:
+	protoc --go_out=plugins=grpc:. proto/ipfix.proto
+
 dependencies:
 	dep ensure -v
 
