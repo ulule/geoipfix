@@ -35,7 +35,11 @@ build:
 build-static:
 	@(echo "-> Creating statically linked binary...")
 	@(mkdir -p $(BIN_DIR))
-	@(CGO_ENABLED=0 go build -ldflags "-X 'main.branch=$(branch)' -X 'main.sha=$(commit)'  -X 'main.now=$(now)' -X 'main.compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/ipfix)
+	@(CGO_ENABLED=0 go build -ldflags "\
+		-X 'ipfix.Branch=$(branch)' \
+		-X 'ipfix.Revision=$(commit)' \
+		-X 'ipfix.BuildTime=$(now)' \
+		-X 'ipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/ipfix ./cmd/main.go)
 
 docker-build:
 	@(echo "-> Preparing builder...")

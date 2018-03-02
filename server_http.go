@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/render"
 	"github.com/go-chi/valve"
 	"go.uber.org/zap"
 )
@@ -63,7 +64,13 @@ func (h *HTTPServer) Init() error {
 	r.Use(middleware.RequestID)
 
 	r.Get("/sys/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+		render.DefaultResponder(w, r, render.M{
+			"status":     "OK",
+			"version":    Version,
+			"revision":   Revision,
+			"build_time": BuildTime,
+			"compiler":   Compiler,
+		})
 	})
 	r.Get("/json/{ipAddress}", h.handle(IPAddressHandler))
 	r.Get("/json/", h.handle(IPAddressHandler))
@@ -104,6 +111,8 @@ func (h *HTTPServer) Serve() error {
 			// start http shutdown
 			srv.Shutdown(ctx)
 
+			h.opt.Logger.Info("HTTP server successfully shutdown")
+
 			// verify, in worst case call cancel via defer
 			select {
 			case <-time.After(21 * time.Second):
@@ -113,5 +122,6 @@ func (h *HTTPServer) Serve() error {
 			}
 		}
 	}()
+
 	return srv.ListenAndServe()
 }

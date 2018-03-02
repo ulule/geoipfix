@@ -42,7 +42,8 @@ Configuration should be stored in a readable file and in JSON format.
                 "port": 3001,
                 "cors": {
                     "allowed_origins": ["*.ulule.com"],
-                    "allowed_methods": ["GET", "HEAD", "POST"]
+                    "allowed_methods": ["GET", "HEAD", "POST"],
+                    "allowed_headers": ["Origin", "Accept", "Content-Type", "X-Requested-With"]
                 }
             }
         },

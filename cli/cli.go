@@ -16,7 +16,7 @@ func Run() {
 	app.Author = "thoas"
 	app.Email = "florent@ulule.com"
 	app.Usage = "A webservice to retrieve geolocation information from an ip address"
-	app.Version = fmt.Sprintf("%s [git:%s:%s]\ncompiled using %s at %s)", ipfix.Version, ipfix.Branch, ipfix.Sha, ipfix.Compiler, ipfix.Now)
+	app.Version = fmt.Sprintf("%s [git:%s:%s]\ncompiled using %s at %s)", ipfix.Version, ipfix.Branch, ipfix.Revision, ipfix.Compiler, ipfix.BuildTime)
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "config, c",

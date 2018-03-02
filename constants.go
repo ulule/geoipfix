@@ -5,7 +5,7 @@ import (
 )
 
 // Version is the current application version
-const Version = "0.2"
+const Version = "0.3"
 
 // DefaultPort is the default server port
 const DefaultPort = 3001
@@ -21,8 +21,8 @@ const RetryInterval = time.Hour
 
 // compilation variables.
 var (
-	Branch   string
-	Sha      string
-	Now      string
-	Compiler string
+	Branch    string
+	Revision  string
+	BuildTime string
+	Compiler  string
 )
