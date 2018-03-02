@@ -1,4 +1,4 @@
-package main
+package ipfix
 
 import (
 	"encoding/json"
@@ -8,12 +8,28 @@ import (
 	"github.com/pkg/errors"
 )
 
+type corsConfig struct {
+	AllowedOrigins   []string `json:"allowed_origins"`
+	AllowedMethods   []string `json:"allowed_methods"`
+	AllowedHeaders   []string `json:"allowed_headers"`
+	AllowCredentials bool     `json:"allow_credentials"`
+	ExposedHeaders   []string `json:"exposed_headers"`
+	MaxAge           int      `json:"max_age"`
+}
+
+type serverHTTPConfig struct {
+	Port int        `json:"port"`
+	Cors corsConfig `json:"cors"`
+}
+
+type serverConfig struct {
+	HTTP serverHTTPConfig `json:"http"`
+}
+
 // Config is ipfix config
 type Config struct {
-	Port           int      `json:"port"`
-	AllowedOrigins []string `json:"allowed_origins"`
-	AllowedMethods []string `json:"allowed_methods"`
-	DatabasePath   string   `json:"database_path"`
+	DatabasePath string       `json:"database_path"`
+	Server       serverConfig `json:"server"`
 }
 
 // Load return a jsonq instance from a config path
@@ -41,8 +57,8 @@ func LoadFromContent(content string) (*Config, error) {
 		cfg.DatabasePath = DatabaseURL
 	}
 
-	if cfg.Port == 0 {
-		cfg.Port = DefaultPort
+	if cfg.Server.HTTP.Port == 0 {
+		cfg.Server.HTTP.Port = DefaultPort
 	}
 
 	return cfg, nil

@@ -2,21 +2,24 @@
 
 
 [[projects]]
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  revision = "4b6ea7319e214d98c938f12692336f7ca9348d6b"
-  version = "v0.10.0"
-
-[[projects]]
-  name = "github.com/codegangsta/negroni"
-  packages = ["."]
-  revision = "fde5e16d32adc7ad637e9cd9ad21d4ebc6192535"
-  version = "v0.2.0"
-
-[[projects]]
   name = "github.com/fiorix/freegeoip"
   packages = ["."]
   revision = "8b86589c43087fce011fbeaaa4a96da374fcf022"
+
+[[projects]]
+  name = "github.com/go-chi/chi"
+  packages = [
+    ".",
+    "middleware"
+  ]
+  revision = "e83ac2304db3c50cf03d96a2fcd39009d458bc35"
+  version = "v3.3.2"
+
+[[projects]]
+  name = "github.com/go-chi/cors"
+  packages = ["."]
+  revision = "dba6525398619dead495962a916728e7ee2ca322"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/howeyc/fsnotify"
@@ -50,33 +53,35 @@
   revision = "3b44b4dcb6c00477273595c312908e2412d07da6"
 
 [[projects]]
-  name = "github.com/rs/cors"
-  packages = ["."]
-  revision = "a62a804a8a009876ca59105f7899938a1349f4b3"
-  version = "v1.0"
-
-[[projects]]
-  name = "github.com/rs/xhandler"
-  packages = ["."]
-  revision = "ed27b6fd65218132ee50cd95f38474a3d8a2cd12"
-  version = "v.11"
-
-[[projects]]
-  name = "github.com/tylerb/graceful"
-  packages = ["."]
-  revision = "50a48b6e73fcc75b45e22c05b79629a67c79e938"
-  version = "v1.2.13"
-
-[[projects]]
   name = "github.com/urfave/cli"
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
 
 [[projects]]
-  name = "golang.org/x/net"
-  packages = ["context"]
-  revision = "7dbad50ab5b31073856416cdcfeb2796d682f844"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  revision = "8474b86a5a6f79c443ce4b2992817ff32cf208b8"
+  version = "v1.3.1"
+
+[[projects]]
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
+  revision = "35aad584952c3e7020db7b839f6b102de6271f89"
+  version = "v1.7.1"
 
 [[projects]]
   name = "golang.org/x/sys"
@@ -98,6 +103,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0a2dfe8a61366f091a2da1906f082ccbb4a57721e9c7be9e52759b40df09a1d2"
+  inputs-digest = "90f2d092141a7b4eff945ac83708bde598a777c33e3c4453da6a80d4048bec42"
   solver-name = "gps-cdcl"
   solver-version = 1

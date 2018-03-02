@@ -37,9 +37,15 @@ Configuration should be stored in a readable file and in JSON format.
 .. code-block:: json
 
     {
-        "port": 3001,
-        "allowed_origins": ["*.ulule.com"],
-        "allowed_methods": ["GET", "HEAD", "POST"],
+        "server": {
+            "http": {
+                "port": 3001,
+                "cors": {
+                    "allowed_origins": ["*.ulule.com"],
+                    "allowed_methods": ["GET", "HEAD", "POST"]
+                }
+            }
+        },
         "database_path": "./GeoLite2-City.mmdb.gz"
     }
 

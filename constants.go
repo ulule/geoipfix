@@ -1,4 +1,4 @@
-package main
+package ipfix
 
 import (
 	"time"
@@ -18,3 +18,11 @@ const UpdateInterval = 24 * time.Hour
 
 // RetryInterval is the default retry time to retry the update
 const RetryInterval = time.Hour
+
+// compilation variables.
+var (
+	Branch   string
+	Sha      string
+	Now      string
+	Compiler string
+)

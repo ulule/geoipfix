@@ -25,30 +25,6 @@
 #   unused-packages = true
 
 
-[[constraint]]
-  name = "github.com/Sirupsen/logrus"
-  version = "0.10.0"
-
-[[constraint]]
-  name = "github.com/codegangsta/cli"
-  version = "1.18.1"
-
-[[constraint]]
-  name = "github.com/codegangsta/negroni"
-  version = "0.2.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/jmoiron/jsonq"
-
-[[constraint]]
-  name = "github.com/rs/cors"
-  version = "1.0.0"
-
-[[constraint]]
-  name = "github.com/tylerb/graceful"
-  version = "1.2.13"
-
 [prune]
   go-tests = true
   unused-packages = true
@@ -56,3 +32,15 @@
 [[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
+
+[[constraint]]
+  name = "github.com/go-chi/chi"
+  version = "3.3.2"
+
+[[constraint]]
+  name = "github.com/go-chi/cors"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "go.uber.org/zap"
+  version = "1.7.1"

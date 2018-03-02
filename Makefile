@@ -11,6 +11,15 @@ compiler = $(shell go version)
 
 test: unit
 
+dependencies:
+	dep ensure -v
+
+run:
+	IPFIX_CONF=`pwd`/config.json ./bin/ipfix
+
+live:
+	@modd
+
 unit:
 	@(go list ./... | xargs -n1 go test -v -cover)
 
@@ -23,7 +32,7 @@ serve:
 build:
 	@(echo "-> Compiling ipfix binary")
 	@(mkdir -p $(BIN_DIR))
-	@(go build -o $(BIN_DIR)/ipfix)
+	@(go build -o $(BIN_DIR)/ipfix ./cmd/main.go)
 	@(echo "-> ipfix binary created")
 
 build-static:
