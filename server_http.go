@@ -18,9 +18,10 @@ import (
 
 // HTTPServer is an HTTP server.
 type HTTPServer struct {
-	cfg serverHTTPConfig
-	mux *chi.Mux
-	opt Options
+	cfg     serverHTTPConfig
+	mux     *chi.Mux
+	opt     Options
+	recover *Recover
 }
 
 // NewHTTPServer retrieves a new HTTPServer instance.
@@ -35,13 +36,19 @@ func NewHTTPServer(cfg serverHTTPConfig, opts ...Option) *HTTPServer {
 
 func (h *HTTPServer) handle(f Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		f(h.opt, w, r)
+		err := f(h.opt, w, r)
+		if err != nil {
+			h.recover.Handle(err)
+		}
 	}
 }
 
 // Init initializes HTTPServer instance.
 func (h *HTTPServer) Init() error {
 	r := chi.NewRouter()
+
+	h.recover = NewRecover(h.opt.Debug, h.opt.Logger)
+
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   h.cfg.Cors.AllowedOrigins,
 		AllowedMethods:   h.cfg.Cors.AllowedMethods,
@@ -50,6 +57,7 @@ func (h *HTTPServer) Init() error {
 		AllowCredentials: h.cfg.Cors.AllowCredentials,
 		MaxAge:           h.cfg.Cors.MaxAge,
 	})
+	r.Use(h.recover.Handler)
 	r.Use(middleware.RealIP)
 	r.Use(cors.Handler)
 	r.Use(middleware.RequestID)

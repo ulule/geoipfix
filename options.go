@@ -21,12 +21,20 @@ func NewOptions(opts ...Option) Options {
 type Options struct {
 	DB     *freegeoip.DB
 	Logger *zap.Logger
+	Debug  bool
 }
 
 // WithDB sets the database.
 func WithDB(db *freegeoip.DB) Option {
 	return func(o *Options) {
 		o.DB = db
+	}
+}
+
+// WithDebug sets the debug flag.
+func WithDebug(debug bool) Option {
+	return func(o *Options) {
+		o.Debug = debug
 	}
 }
 

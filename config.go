@@ -28,6 +28,7 @@ type serverConfig struct {
 
 // Config is ipfix config
 type Config struct {
+	Debug        bool         `json:"debug"`
 	DatabasePath string       `json:"database_path"`
 	Server       serverConfig `json:"server"`
 }

@@ -9,6 +9,7 @@ func Run(config string) error {
 
 	httpServer := NewHTTPServer(app.Config.Server.HTTP,
 		WithLogger(app.Logger),
+		WithDebug(app.Config.Debug),
 		WithDB(app.DB))
 	err = httpServer.Init()
 	if err != nil {
