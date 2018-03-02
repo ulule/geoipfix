@@ -60,6 +60,7 @@ func (h *httpServer) Init() error {
 	r.Use(middleware.RealIP)
 	r.Use(cors.Handler)
 	r.Use(middleware.RequestID)
+	r.Use(newLoggerMiddleware(h.opt.Logger))
 
 	r.Get("/sys/health", func(w http.ResponseWriter, r *http.Request) {
 		render.DefaultResponder(w, r, render.M{
