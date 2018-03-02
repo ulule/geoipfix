@@ -33,6 +33,7 @@ func newHTTPServer(cfg serverHTTPConfig, opts ...option) *httpServer {
 	}
 }
 
+// handle handles an handler and captures error.
 func (h *httpServer) handle(f handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := f(h.opt, w, r)
