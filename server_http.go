@@ -14,26 +14,26 @@ import (
 	"go.uber.org/zap"
 )
 
-// HTTPServer is an HTTP server.
-type HTTPServer struct {
+// httpServer is an HTTP server.
+type httpServer struct {
 	srv     http.Server
 	cfg     serverHTTPConfig
 	mux     *chi.Mux
-	opt     Options
-	recover *Recover
+	opt     options
+	recover *recoverMiddleware
 }
 
-// NewHTTPServer retrieves a new HTTPServer instance.
-func NewHTTPServer(cfg serverHTTPConfig, opts ...Option) *HTTPServer {
-	opt := NewOptions(opts...)
+// newHTTPServer retrieves a new HTTPServer instance.
+func newHTTPServer(cfg serverHTTPConfig, opts ...option) *httpServer {
+	opt := newOptions(opts...)
 
-	return &HTTPServer{
+	return &httpServer{
 		cfg: cfg,
 		opt: opt,
 	}
 }
 
-func (h *HTTPServer) handle(f Handler) http.HandlerFunc {
+func (h *httpServer) handle(f handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := f(h.opt, w, r)
 		if err != nil {
@@ -42,11 +42,11 @@ func (h *HTTPServer) handle(f Handler) http.HandlerFunc {
 	}
 }
 
-// Init initializes HTTPServer instance.
-func (h *HTTPServer) Init() error {
+// Init initializes http server instance.
+func (h *httpServer) Init() error {
 	r := chi.NewRouter()
 
-	h.recover = NewRecover(h.opt.Debug, h.opt.Logger)
+	h.recover = newRecoverMiddleware(h.opt.Debug, h.opt.Logger)
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   h.cfg.Cors.AllowedOrigins,
@@ -70,8 +70,8 @@ func (h *HTTPServer) Init() error {
 			"compiler":   Compiler,
 		})
 	})
-	r.Get("/json/{ipAddress}", h.handle(IPAddressHandler))
-	r.Get("/json/", h.handle(IPAddressHandler))
+	r.Get("/json/{ipAddress}", h.handle(ipAddressHandler))
+	r.Get("/json/", h.handle(ipAddressHandler))
 
 	h.mux = r
 
@@ -79,7 +79,7 @@ func (h *HTTPServer) Init() error {
 }
 
 // Serve serves http requests.
-func (h *HTTPServer) Serve(ctx context.Context) error {
+func (h *httpServer) Serve(ctx context.Context) error {
 	addr := fmt.Sprintf(":%s", strconv.Itoa(h.cfg.Port))
 
 	h.srv = http.Server{
@@ -91,13 +91,14 @@ func (h *HTTPServer) Serve(ctx context.Context) error {
 	return h.srv.ListenAndServe()
 }
 
-func (h *HTTPServer) Shutdown() {
-	// create context with timeout
+// Shutdown stops the http server.
+func (h *httpServer) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	// start http shutdown
-	h.srv.Shutdown(ctx)
+	err := h.srv.Shutdown(ctx)
 
-	h.opt.Logger.Info("HTTP server successfully shutdown")
+	h.opt.Logger.Info("HTTP server shutdown")
+
+	return err
 }

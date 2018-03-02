@@ -11,11 +11,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Handler is an http.Handler with ipfix options.
-type Handler func(opt Options, w http.ResponseWriter, r *http.Request) error
+// handler is an http.Handler with ipfix options.
+type handler func(opt options, w http.ResponseWriter, r *http.Request) error
 
-// IPAddressHandler retrieves the IP from request.
-func IPAddressHandler(opt Options, w http.ResponseWriter, r *http.Request) error {
+// ipAddressHandler retrieves the IP from request.
+func ipAddressHandler(opt options, w http.ResponseWriter, r *http.Request) error {
 	rawIP := chi.URLParam(r, "ipAddress")
 	if rawIP == "" {
 		rawIP = r.RemoteAddr

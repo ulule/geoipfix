@@ -5,42 +5,42 @@ import (
 	"go.uber.org/zap"
 )
 
-// Option is a functional option.
-type Option func(*Options)
+// option is a functional option.
+type option func(*options)
 
 // NewOptions initializes ipfix options.
-func NewOptions(opts ...Option) Options {
-	opt := Options{}
+func newOptions(opts ...option) options {
+	opt := options{}
 	for _, o := range opts {
 		o(&opt)
 	}
 	return opt
 }
 
-// Options are ipfix options.
-type Options struct {
+// options are ipfix options.
+type options struct {
 	DB     *freegeoip.DB
 	Logger *zap.Logger
 	Debug  bool
 }
 
-// WithDB sets the database.
-func WithDB(db *freegeoip.DB) Option {
-	return func(o *Options) {
+// withDB sets the database.
+func withDB(db *freegeoip.DB) option {
+	return func(o *options) {
 		o.DB = db
 	}
 }
 
-// WithDebug sets the debug flag.
-func WithDebug(debug bool) Option {
-	return func(o *Options) {
+// withDebug sets the debug flag.
+func withDebug(debug bool) option {
+	return func(o *options) {
 		o.Debug = debug
 	}
 }
 
-// WithLogger sets the logger.
-func WithLogger(logger *zap.Logger) Option {
-	return func(o *Options) {
+// withLogger sets the logger.
+func withLogger(logger *zap.Logger) option {
+	return func(o *options) {
 		o.Logger = logger
 	}
 }

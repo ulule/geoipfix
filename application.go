@@ -5,16 +5,16 @@ import (
 	"go.uber.org/zap"
 )
 
-// Application is the ipfix application.
-type Application struct {
+// application is the ipfix application.
+type application struct {
 	DB     *freegeoip.DB
 	Logger *zap.Logger
-	Config *Config
+	Config *config
 }
 
-// NewApplication initializes a new Application instance.
-func NewApplication(config string) (*Application, error) {
-	cfg, err := Load(config)
+// newApplication initializes a new Application instance.
+func newApplication(config string) (*application, error) {
+	cfg, err := loadConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewApplication(config string) (*Application, error) {
 
 	logger, _ := zap.NewProduction()
 
-	return &Application{
+	return &application{
 		Config: cfg,
 		Logger: logger,
 		DB:     db,

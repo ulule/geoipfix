@@ -26,27 +26,27 @@ type serverConfig struct {
 	HTTP serverHTTPConfig `json:"http"`
 }
 
-// Config is ipfix config
-type Config struct {
+// config is ipfix config
+type config struct {
 	Debug        bool         `json:"debug"`
 	DatabasePath string       `json:"database_path"`
 	Server       serverConfig `json:"server"`
 }
 
-// Load return a jsonq instance from a config path
-func Load(path string) (*Config, error) {
+// loadConfig return a jsonq instance from a config path
+func loadConfig(path string) (*config, error) {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Config file %s cannot be loaded", path)
 	}
 
-	return LoadFromContent(string(content))
+	return loadConfigFromContent(string(content))
 }
 
-// LoadFromContent returns a jsonq instance from a config content
-func LoadFromContent(content string) (*Config, error) {
-	cfg := &Config{}
+// loadConfigFromContent returns a jsonq instance from a config content
+func loadConfigFromContent(content string) (*config, error) {
+	cfg := &config{}
 	dec := json.NewDecoder(strings.NewReader(content))
 	err := dec.Decode(cfg)
 

@@ -10,17 +10,17 @@ import (
 
 // Run launchs the server with a config path.
 func Run(config string) error {
-	app, err := NewApplication(config)
+	app, err := newApplication(config)
 	if err != nil {
 		return err
 	}
 
 	defer app.Logger.Sync()
 
-	httpServer := NewHTTPServer(app.Config.Server.HTTP,
-		WithLogger(app.Logger),
-		WithDebug(app.Config.Debug),
-		WithDB(app.DB))
+	httpServer := newHTTPServer(app.Config.Server.HTTP,
+		withLogger(app.Logger),
+		withDebug(app.Config.Debug),
+		withDB(app.DB))
 	err = httpServer.Init()
 	if err != nil {
 		return err
@@ -35,12 +35,10 @@ func Run(config string) error {
 
 	<-c
 
-	app.Logger.Info("shutting down..")
+	app.Logger.Info("Shutting down servers..")
 
 	// first valv
 	valv.Shutdown(20 * time.Second)
 
-	httpServer.Shutdown()
-
-	return nil
+	return httpServer.Shutdown()
 }

@@ -10,19 +10,19 @@ import (
 
 type middlewareHandler = func(next http.Handler) http.Handler
 
-type Recover struct {
+type recoverMiddleware struct {
 	debug bool
 	logger *zap.Logger
 }
 
-func NewRecover(debug bool, logger *zap.Logger) *Recover {
-	return &Recover{
+func newRecoverMiddleware(debug bool, logger *zap.Logger) *recoverMiddleware {
+	return &recoverMiddleware{
 		debug: debug,
 		logger: logger,
 	}
 }
 
-func (m *Recover) Handle(it interface{}) {
+func (m *recoverMiddleware) Handle(it interface{}) {
 	if m.debug {
 		fmt.Fprintf(os.Stderr, "Panic: %+v\n", it)
 		debug.PrintStack()
@@ -31,7 +31,7 @@ func (m *Recover) Handle(it interface{}) {
 	}
 }
 
-func (m *Recover) Handler(next http.Handler) http.Handler {
+func (m *recoverMiddleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rvr := recover(); rvr != nil {
