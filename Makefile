@@ -11,25 +11,35 @@ compiler = $(shell go version)
 
 test: unit
 
+dependencies:
+	dep ensure -v
+
+run:
+	IPFIX_CONF=`pwd`/config.json ./bin/ipfix
+
+live:
+	@modd
+
 unit:
 	@(go list ./... | xargs -n1 go test -v -cover)
 
 all: ipfix
 	@(mkdir -p $(BIN_DIR))
 
-serve:
-	IPFIX_CONFIG_PATH=config.json gin run
-
 build:
 	@(echo "-> Compiling ipfix binary")
 	@(mkdir -p $(BIN_DIR))
-	@(go build -o $(BIN_DIR)/ipfix)
+	@(go build -o $(BIN_DIR)/ipfix ./cmd/main.go)
 	@(echo "-> ipfix binary created")
 
 build-static:
 	@(echo "-> Creating statically linked binary...")
 	@(mkdir -p $(BIN_DIR))
-	@(CGO_ENABLED=0 go build -ldflags "-X 'main.branch=$(branch)' -X 'main.sha=$(commit)'  -X 'main.now=$(now)' -X 'main.compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/ipfix)
+	@(CGO_ENABLED=0 go build -ldflags "\
+		-X 'ipfix.Branch=$(branch)' \
+		-X 'ipfix.Revision=$(commit)' \
+		-X 'ipfix.BuildTime=$(now)' \
+		-X 'ipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/ipfix ./cmd/main.go)
 
 docker-build:
 	@(echo "-> Preparing builder...")

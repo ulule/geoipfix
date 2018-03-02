@@ -1,34 +1,34 @@
-package main
+package ipfix
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"strings"
-
-	"github.com/jmoiron/jsonq"
+	"github.com/fiorix/freegeoip"
+	"go.uber.org/zap"
 )
 
-// Load return a jsonq instance from a config path
-func Load(path string) (*jsonq.JsonQuery, error) {
-	content, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		return nil, fmt.Errorf("Config file %s cannot be loaded: %s", path, err)
-	}
-
-	return LoadFromContent(string(content))
+// application is the ipfix application.
+type application struct {
+	DB     *freegeoip.DB
+	Logger *zap.Logger
+	Config *config
 }
 
-// LoadFromContent returns a jsonq instance from a config content
-func LoadFromContent(content string) (*jsonq.JsonQuery, error) {
-	data := map[string]interface{}{}
-	dec := json.NewDecoder(strings.NewReader(content))
-	err := dec.Decode(&data)
-
+// newApplication initializes a new Application instance.
+func newApplication(config string) (*application, error) {
+	cfg, err := loadConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("Config file %s cannot be parsed: %s", content, err)
+		return nil, err
 	}
 
-	return jsonq.NewQuery(data), nil
+	db, err := openDB(cfg.DatabasePath, UpdateInterval, RetryInterval)
+	if err != nil {
+		return nil, err
+	}
+
+	logger, _ := zap.NewProduction()
+
+	return &application{
+		Config: cfg,
+		Logger: logger,
+		DB:     db,
+	}, nil
 }

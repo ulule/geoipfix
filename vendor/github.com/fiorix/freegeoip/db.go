@@ -1,4 +1,4 @@
-// Copyright 2009-2014 The freegeoip authors. All rights reserved.
+// Copyright 2009 The freegeoip authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,15 +6,18 @@ package freegeoip
 
 import (
 	"compress/gzip"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 	"time"
 
@@ -26,19 +29,24 @@ var (
 	// ErrUnavailable may be returned by DB.Lookup when the database
 	// points to a URL and is not yet available because it's being
 	// downloaded in background.
-	ErrUnavailable = errors.New("No database available")
+	ErrUnavailable = errors.New("no database available")
 
 	// Local cached copy of a database downloaded from a URL.
 	defaultDB = filepath.Join(os.TempDir(), "freegeoip", "db.gz")
+
+	// MaxMindDB is the URL of the free MaxMind GeoLite2 database.
+	MaxMindDB = "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
 )
 
 // DB is the IP geolocation database.
 type DB struct {
 	file        string            // Database file name.
+	checksum    string            // MD5 of the unzipped database file
 	reader      *maxminddb.Reader // Actual db object.
 	notifyQuit  chan struct{}     // Stop auto-update and watch goroutines.
 	notifyOpen  chan string       // Notify when a db file is open.
 	notifyError chan error        // Notify when an error occurs.
+	notifyInfo  chan string       // Notify random actions for logging
 	closed      bool              // Mark this db as closed.
 	lastUpdated time.Time         // Last time the db was updated.
 	mu          sync.RWMutex      // Protects all the above.
@@ -51,14 +59,15 @@ type DB struct {
 //
 // The database file is monitored by fsnotify and automatically
 // reloads when the file is updated or overwritten.
-func Open(dsn string) (db *DB, err error) {
-	db = &DB{
+func Open(dsn string) (*DB, error) {
+	db := &DB{
 		file:        dsn,
 		notifyQuit:  make(chan struct{}),
 		notifyOpen:  make(chan string, 1),
 		notifyError: make(chan error, 1),
+		notifyInfo:  make(chan string, 1),
 	}
-	err = db.openFile()
+	err := db.openFile()
 	if err != nil {
 		db.Close()
 		return nil, err
@@ -71,20 +80,67 @@ func Open(dsn string) (db *DB, err error) {
 	return db, nil
 }
 
-// OpenURL creates and initializes a DB from a remote file.
-// It automatically downloads and updates the file in background.
-func OpenURL(url string, updateInterval, maxRetryInterval time.Duration) (db *DB, err error) {
-	db = &DB{
+// MaxMindUpdateURL generates the URL for MaxMind paid databases.
+func MaxMindUpdateURL(hostname, productID, userID, licenseKey string) (string, error) {
+	limiter := func(r io.Reader) *io.LimitedReader {
+		return &io.LimitedReader{R: r, N: 1 << 30}
+	}
+	baseurl := "https://" + hostname + "/app/"
+	// Get the file name for the product ID.
+	u := baseurl + "update_getfilename?product_id=" + productID
+	resp, err := http.Get(u)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	md5hash := md5.New()
+	_, err = io.Copy(md5hash, limiter(resp.Body))
+	if err != nil {
+		return "", err
+	}
+	sum := md5hash.Sum(nil)
+	hexdigest1 := hex.EncodeToString(sum[:])
+	// Get our client IP address.
+	resp, err = http.Get(baseurl + "update_getipaddr")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	md5hash = md5.New()
+	io.WriteString(md5hash, licenseKey)
+	_, err = io.Copy(md5hash, limiter(resp.Body))
+	if err != nil {
+		return "", err
+	}
+	sum = md5hash.Sum(nil)
+	hexdigest2 := hex.EncodeToString(sum[:])
+	// Generate the URL.
+	params := url.Values{
+		"db_md5":        {hexdigest1},
+		"challenge_md5": {hexdigest2},
+		"user_id":       {userID},
+		"edition_id":    {productID},
+	}
+	u = baseurl + "update_secure?" + params.Encode()
+	return u, nil
+}
+
+// OpenURL creates and initializes a DB from a URL.
+// It automatically downloads and updates the file in background, and
+// keeps a local copy on $TMPDIR.
+func OpenURL(url string, updateInterval, maxRetryInterval time.Duration) (*DB, error) {
+	db := &DB{
 		file:             defaultDB,
 		notifyQuit:       make(chan struct{}),
 		notifyOpen:       make(chan string, 1),
 		notifyError:      make(chan error, 1),
+		notifyInfo:       make(chan string, 1),
 		updateInterval:   updateInterval,
 		maxRetryInterval: maxRetryInterval,
 	}
 	db.openFile() // Optional, might fail.
 	go db.autoUpdate(url)
-	err = db.watchFile()
+	err := db.watchFile()
 	if err != nil {
 		db.Close()
 		return nil, fmt.Errorf("fsnotify failed for %s: %s", db.file, err)
@@ -122,7 +178,7 @@ func (db *DB) watchEvents(watcher *fsnotify.Watcher) {
 }
 
 func (db *DB) openFile() error {
-	reader, err := db.newReader(db.file)
+	reader, checksum, err := db.newReader(db.file)
 	if err != nil {
 		return err
 	}
@@ -130,29 +186,31 @@ func (db *DB) openFile() error {
 	if err != nil {
 		return err
 	}
-	db.setReader(reader, stat.ModTime())
+	db.setReader(reader, stat.ModTime(), checksum)
 	return nil
 }
 
-func (db *DB) newReader(dbfile string) (*maxminddb.Reader, error) {
+func (db *DB) newReader(dbfile string) (*maxminddb.Reader, string, error) {
 	f, err := os.Open(dbfile)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer f.Close()
 	gzf, err := gzip.NewReader(f)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer gzf.Close()
 	b, err := ioutil.ReadAll(gzf)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return maxminddb.FromBytes(b)
+	checksum := fmt.Sprintf("%x", md5.Sum(b))
+	mmdb, err := maxminddb.FromBytes(b)
+	return mmdb, checksum, err
 }
 
-func (db *DB) setReader(reader *maxminddb.Reader, modtime time.Time) {
+func (db *DB) setReader(reader *maxminddb.Reader, modtime time.Time, checksum string) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.closed {
@@ -164,6 +222,7 @@ func (db *DB) setReader(reader *maxminddb.Reader, modtime time.Time) {
 	}
 	db.reader = reader
 	db.lastUpdated = modtime.UTC()
+	db.checksum = checksum
 	select {
 	case db.notifyOpen <- db.file:
 	default:
@@ -171,29 +230,23 @@ func (db *DB) setReader(reader *maxminddb.Reader, modtime time.Time) {
 }
 
 func (db *DB) autoUpdate(url string) {
-	var sleep time.Duration
-	var retrying bool
+	backoff := time.Second
 	for {
+		db.sendInfo("starting update")
 		err := db.runUpdate(url)
 		if err != nil {
-			db.sendError(fmt.Errorf("Database update failed: %s", err))
-			if !retrying {
-				retrying = true
-				sleep = 5 * time.Second
-			} else {
-				sleep *= 2
-				if sleep > db.maxRetryInterval {
-					sleep = db.maxRetryInterval
-				}
-			}
+			bs := backoff.Seconds()
+			ms := db.maxRetryInterval.Seconds()
+			backoff = time.Duration(math.Min(bs*math.E, ms)) * time.Second
+			db.sendError(fmt.Errorf("download failed (will retry in %s): %s", backoff, err))
 		} else {
-			retrying = false
-			sleep = db.updateInterval
+			backoff = db.updateInterval
 		}
+		db.sendInfo("finished update")
 		select {
 		case <-db.notifyQuit:
 			return
-		case <-time.After(sleep):
+		case <-time.After(backoff):
 			// Sleep till time for the next update attempt.
 		}
 	}
@@ -224,13 +277,20 @@ func (db *DB) needUpdate(url string) (bool, error) {
 	if err != nil {
 		return true, nil // Local db is missing, must be downloaded.
 	}
+
 	resp, err := http.Head(url)
 	if err != nil {
 		return false, err
 	}
 	defer resp.Body.Close()
-	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
-	if stat.Size() != int64(size) {
+
+	// Check X-Database-MD5 if it exists
+	headerMd5 := resp.Header.Get("X-Database-MD5")
+	if len(headerMd5) > 0 && db.checksum != headerMd5 {
+		return true, nil
+	}
+
+	if stat.Size() != resp.ContentLength {
 		return true, nil
 	}
 	return false, nil
@@ -303,6 +363,12 @@ func (db *DB) NotifyError() (errChan <-chan error) {
 	return db.notifyError
 }
 
+// NotifyInfo returns a channel that notifies informational messages
+// while downloading or reloading.
+func (db *DB) NotifyInfo() <-chan string {
+	return db.notifyInfo
+}
+
 func (db *DB) sendError(err error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
@@ -315,19 +381,24 @@ func (db *DB) sendError(err error) {
 	}
 }
 
-// Lookup takes an IP address and a pointer to the result value to decode
-// into. The result value pointed to must be a data value that corresponds
-// to a record in the database. This may include a struct representation
-// of the data, a map capable of holding the data or an empty interface{}
-// value.
+func (db *DB) sendInfo(message string) {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	if db.closed {
+		return
+	}
+	select {
+	case db.notifyInfo <- message:
+	default:
+	}
+}
+
+// Lookup performs a database lookup of the given IP address, and stores
+// the response into the result value. The result value must be a struct
+// with specific fields and tags as described here:
+// https://godoc.org/github.com/oschwald/maxminddb-golang#Reader.Lookup
 //
-// If result is a pointer to a struct, the struct need not include a field
-// for every value that may be in the database. If a field is not present
-// in the structure, the decoder will not decode that field, reducing the
-// time required to decode the record.
-//
-// See https://godoc.org/github.com/oschwald/maxminddb-golang#Reader.Lookup
-// for details.
+// See the DefaultQuery for an example of the result struct.
 func (db *DB) Lookup(addr net.IP, result interface{}) error {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
@@ -337,7 +408,34 @@ func (db *DB) Lookup(addr net.IP, result interface{}) error {
 	return ErrUnavailable
 }
 
-// Close the database.
+// DefaultQuery is the default query used for database lookups.
+type DefaultQuery struct {
+	Continent struct {
+		Names map[string]string `maxminddb:"names"`
+	} `maxminddb:"continent"`
+	Country struct {
+		ISOCode string            `maxminddb:"iso_code"`
+		Names   map[string]string `maxminddb:"names"`
+	} `maxminddb:"country"`
+	Region []struct {
+		ISOCode string            `maxminddb:"iso_code"`
+		Names   map[string]string `maxminddb:"names"`
+	} `maxminddb:"subdivisions"`
+	City struct {
+		Names map[string]string `maxminddb:"names"`
+	} `maxminddb:"city"`
+	Location struct {
+		Latitude  float64 `maxminddb:"latitude"`
+		Longitude float64 `maxminddb:"longitude"`
+		MetroCode uint    `maxminddb:"metro_code"`
+		TimeZone  string  `maxminddb:"time_zone"`
+	} `maxminddb:"location"`
+	Postal struct {
+		Code string `maxminddb:"code"`
+	} `maxminddb:"postal"`
+}
+
+// Close closes the database.
 func (db *DB) Close() {
 	db.mu.Lock()
 	defer db.mu.Unlock()
@@ -346,6 +444,7 @@ func (db *DB) Close() {
 		close(db.notifyQuit)
 		close(db.notifyOpen)
 		close(db.notifyError)
+		close(db.notifyInfo)
 	}
 	if db.reader != nil {
 		db.reader.Close()

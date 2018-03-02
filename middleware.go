@@ -1,65 +1,108 @@
-package main
+package ipfix
 
 import (
+	"time"
 	"fmt"
 	"net/http"
-	"time"
+	"os"
+	"runtime/debug"
 
-	"strings"
-
-	"github.com/Sirupsen/logrus"
-	"github.com/codegangsta/negroni"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"github.com/go-chi/chi/middleware"
 )
 
-// Middleware is a middleware handler that logs the request as it goes in and the response as it goes out.
-type LogrusMiddleware struct {
-	// Logger is the log.Logger instance used to log messages with the Logger middleware
-	Logger *logrus.Logger
-	// Name is the name of the application as recorded in latency metrics
-	Name string
+type middlewareHandler = func(next http.Handler) http.Handler
+
+type recoverMiddleware struct {
+	debug bool
+	logger *zap.Logger
 }
 
-// NewMiddleware returns a new *Middleware, yay!
-func NewLogrusMiddleware() *LogrusMiddleware {
-	return NewCustomLogrusMiddleware(logrus.InfoLevel, &logrus.TextFormatter{}, "web")
+func newRecoverMiddleware(debug bool, logger *zap.Logger) *recoverMiddleware {
+	return &recoverMiddleware{
+		debug: debug,
+		logger: logger,
+	}
 }
 
-// NewCustomMiddleware builds a *Middleware with the given level and formatter
-func NewCustomLogrusMiddleware(level logrus.Level, formatter logrus.Formatter, name string) *LogrusMiddleware {
-	log := logrus.New()
-	log.Level = level
-	log.Formatter = formatter
-
-	return &LogrusMiddleware{Logger: log, Name: name}
+func (m *recoverMiddleware) Handle(it interface{}) {
+	if m.debug {
+		fmt.Fprintf(os.Stderr, "Panic: %+v\n", it)
+		debug.PrintStack()
+	} else {
+		m.logger.Error("Error handled")
+	}
 }
 
-func (l *LogrusMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	start := time.Now()
+func (m *recoverMiddleware) Handler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rvr := recover(); rvr != nil {
+				m.Handle(rvr)
 
-	headers := []string{}
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+		}()
 
-	for k, v := range r.Header {
-		headers = append(headers, fmt.Sprintf("%s: %s", k, v))
+		next.ServeHTTP(w, r)
+	})
+}
+
+func newLoggerMiddleware(logger *zap.Logger) func(next http.Handler) http.Handler {
+	return middleware.RequestLogger(&StructuredLogger{logger})
+}
+
+type StructuredLogger struct {
+	Logger *zap.Logger
+}
+
+func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
+	entry := &StructuredLoggerEntry{Logger: l.Logger}
+
+	fields := []zapcore.Field{zap.String("ts", time.Now().UTC().Format(time.RFC1123))}
+
+	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
+		fields = append(fields, zap.String("req.id", reqID))
 	}
 
-	l.Logger.WithFields(logrus.Fields{
-		"method":  r.Method,
-		"request": r.RequestURI,
-		"remote":  r.RemoteAddr,
-		"headers": strings.Join(headers, " | "),
-	}).Info("started handling request")
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
 
-	next(rw, r)
+	fields = append(fields, []zapcore.Field{
+		zap.String("http.scheme", scheme),
+		zap.String("http.proto", r.Proto),
+		zap.String("http.method", r.Method),
+		zap.String("remote_addr", r.RemoteAddr),
+		zap.String("user_agent", r.UserAgent()),
+		zap.String("uri", fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)),
+	}...)
 
-	latency := time.Since(start)
-	res := rw.(negroni.ResponseWriter)
-	l.Logger.WithFields(logrus.Fields{
-		"status":      res.Status(),
-		"method":      r.Method,
-		"request":     r.RequestURI,
-		"remote":      r.RemoteAddr,
-		"text_status": http.StatusText(res.Status()),
-		"took":        latency,
-		fmt.Sprintf("measure#%s.latency", l.Name): latency.Nanoseconds(),
-	}).Info("completed handling request")
+	entry.Logger = l.Logger.With(fields...)
+
+	entry.Logger.Info("request started")
+
+	return entry
+}
+
+type StructuredLoggerEntry struct {
+	Logger *zap.Logger
+}
+
+func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) {
+	l.Logger = l.Logger.With(
+		zap.Int("res.status", status),
+		zap.Int("res.bytes_length", bytes),
+		zap.Float64("res.elapsed_ms", float64(elapsed.Nanoseconds()) / 1000000.0))
+
+	l.Logger.Info("request complete")
+}
+
+func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
+	l.Logger = l.Logger.With(
+		zap.String("stack", string(stack)),
+		zap.String("panic", fmt.Sprintf("%+v", v)),
+	)
 }

@@ -1,4 +1,4 @@
-FROM golang:1.7.1
+FROM golang:1.10.0
 
 ADD . /go/src/github.com/ulule/ipfix
 

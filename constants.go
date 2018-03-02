@@ -1,11 +1,11 @@
-package main
+package ipfix
 
 import (
 	"time"
 )
 
 // Version is the current application version
-const Version = "0.2"
+const Version = "0.3"
 
 // DefaultPort is the default server port
 const DefaultPort = 3001
@@ -18,3 +18,11 @@ const UpdateInterval = 24 * time.Hour
 
 // RetryInterval is the default retry time to retry the update
 const RetryInterval = time.Hour
+
+// compilation variables.
+var (
+	Branch    string
+	Revision  string
+	BuildTime string
+	Compiler  string
+)
