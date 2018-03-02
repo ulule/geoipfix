@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
 	"time"
 
@@ -13,12 +11,12 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
-	"github.com/go-chi/valve"
 	"go.uber.org/zap"
 )
 
 // HTTPServer is an HTTP server.
 type HTTPServer struct {
+	srv     http.Server
 	cfg     serverHTTPConfig
 	mux     *chi.Mux
 	opt     Options
@@ -81,47 +79,25 @@ func (h *HTTPServer) Init() error {
 }
 
 // Serve serves http requests.
-func (h *HTTPServer) Serve() error {
+func (h *HTTPServer) Serve(ctx context.Context) error {
 	addr := fmt.Sprintf(":%s", strconv.Itoa(h.cfg.Port))
 
-	valv := valve.New()
-	baseCtx := valv.Context()
-
-	srv := http.Server{
+	h.srv = http.Server{
 		Addr:    addr,
-		Handler: chi.ServerBaseContext(baseCtx, h.mux),
+		Handler: chi.ServerBaseContext(ctx, h.mux),
 	}
 	h.opt.Logger.Info("Launch HTTP server", zap.String("addr", addr))
-	defer h.opt.Logger.Sync()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			// sig is a ^C, handle it
-			h.opt.Logger.Info("shutting down..")
+	return h.srv.ListenAndServe()
+}
 
-			// first valv
-			valv.Shutdown(20 * time.Second)
+func (h *HTTPServer) Shutdown() {
+	// create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
 
-			// create context with timeout
-			ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-			defer cancel()
+	// start http shutdown
+	h.srv.Shutdown(ctx)
 
-			// start http shutdown
-			srv.Shutdown(ctx)
-
-			h.opt.Logger.Info("HTTP server successfully shutdown")
-
-			// verify, in worst case call cancel via defer
-			select {
-			case <-time.After(21 * time.Second):
-				h.opt.Logger.Info("not all connections have been closed")
-			case <-ctx.Done():
-
-			}
-		}
-	}()
-
-	return srv.ListenAndServe()
+	h.opt.Logger.Info("HTTP server successfully shutdown")
 }
