@@ -6,9 +6,14 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/ulule/ipfix/proto"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tags"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+
+	"github.com/ulule/ipfix/proto"
 )
 
 // rpcServer is an RPC server.
@@ -30,8 +35,15 @@ func newRPCServer(cfg serverRPCConfig, opts ...option) *rpcServer {
 
 // Init initializes rpc server instance.
 func (h *rpcServer) Init() error {
-	s := grpc.NewServer()
-	proto.RegisterIpfixServer(s, &rpcHandler{opt: h.opt})
+	grpc_zap.ReplaceGrpcLogger(h.opt.Logger)
+
+	s := grpc.NewServer(
+		grpc_middleware.WithUnaryServerChain(
+			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
+			grpc_zap.UnaryServerInterceptor(h.opt.Logger),
+		),
+	)
+	proto.RegisterIpfixServer(s, &rpcHandler{h.opt})
 
 	h.srv = s
 

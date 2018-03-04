@@ -35,16 +35,31 @@
   revision = "9e45288364f420dd8e094fab4f64437fca5245a6"
 
 [[projects]]
+  branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
+    "jsonpb",
     "proto",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
+    "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "bbd03ef6da3a115852eaf24c8a1c46aeb39aa175"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/grpc-ecosystem/go-grpc-middleware"
+  packages = [
+    ".",
+    "logging",
+    "logging/zap",
+    "logging/zap/ctxzap",
+    "tags",
+    "tags/zap"
+  ]
+  revision = "eb23b08d08bbe930113a6512a7a829050341448c"
 
 [[projects]]
   name = "github.com/howeyc/fsnotify"
@@ -176,6 +191,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f844de3e176814bdb6c0d892eabed2debc446f2db7dee63731b40e502913add3"
+  inputs-digest = "16b7de2563f03b81c4627796a1a2e9ca35eacdc7d1d04326bd8c831f8af8e75a"
   solver-name = "gps-cdcl"
   solver-version = 1

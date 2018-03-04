@@ -21,11 +21,12 @@ func ipAddressHandler(opt options, w http.ResponseWriter, r *http.Request) error
 		rawIP = r.RemoteAddr
 	}
 
-	opt.Logger.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
+	log := opt.Logger.With(zap.String("ip_address", rawIP))
+	log.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
 
 	ip := net.ParseIP(rawIP)
 	if ip == nil {
-		opt.Logger.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
+		log.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
 
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 

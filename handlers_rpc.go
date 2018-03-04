@@ -10,24 +10,25 @@ import (
 )
 
 type rpcHandler struct {
-	opt options
+	options
 }
 
 // GetLocation retrieves location from protobuf
 func (h *rpcHandler) GetLocation(ctx context.Context, req *proto.GetLocationRequest) (*proto.Location, error) {
 	rawIP := req.IpAddress
 
-	h.opt.Logger.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
+	log := h.Logger.With(zap.String("ip_address", rawIP))
+	log.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
 
 	ip := net.ParseIP(rawIP)
 	if ip == nil {
-		h.opt.Logger.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
+		log.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
 
 		return nil, errors.Errorf("IP Address %s cannot be parsed", rawIP)
 	}
 
 	q := geoipQuery{}
-	err := h.opt.DB.Lookup(ip, &q)
+	err := h.DB.Lookup(ip, &q)
 	if err != nil {
 		return nil, err
 	}
