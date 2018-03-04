@@ -26,6 +26,7 @@ type httpServer struct {
 // newHTTPServer retrieves a new HTTPServer instance.
 func newHTTPServer(cfg serverHTTPConfig, opts ...option) *httpServer {
 	opt := newOptions(opts...)
+	opt.Logger = opt.Logger.With(zap.String("server", "http"))
 
 	return &httpServer{
 		cfg: cfg,

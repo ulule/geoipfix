@@ -56,7 +56,7 @@ func roundFloat(val float64, roundOn float64, places int) (newVal float64) {
 	return round / pow
 }
 
-type responseRecord struct {
+type record struct {
 	XMLName     xml.Name `xml:"Response" json:"-"`
 	IP          string   `json:"ip"`
 	CountryCode string   `json:"country_code"`
@@ -71,10 +71,10 @@ type responseRecord struct {
 	MetroCode   uint     `json:"metro_code"`
 }
 
-func (q *geoipQuery) Record(ip net.IP, lang string) *responseRecord {
+func (q *geoipQuery) Record(ip net.IP, lang string) *record {
 	lang = parseAcceptLanguage(lang, q.Country.Names)
 
-	r := &responseRecord{
+	r := &record{
 		IP:          ip.String(),
 		CountryCode: q.Country.ISOCode,
 		CountryName: q.Country.Names[lang],

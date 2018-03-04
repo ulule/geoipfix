@@ -20,6 +20,7 @@ type rpcServer struct {
 
 func newRPCServer(cfg serverRPCConfig, opts ...option) *rpcServer {
 	opt := newOptions(opts...)
+	opt.Logger = opt.Logger.With(zap.String("server", "rpc"))
 
 	return &rpcServer{
 		cfg: cfg,
@@ -30,7 +31,7 @@ func newRPCServer(cfg serverRPCConfig, opts ...option) *rpcServer {
 // Init initializes rpc server instance.
 func (h *rpcServer) Init() error {
 	s := grpc.NewServer()
-	proto.RegisterIpfixServer(s, &rpcHandler{})
+	proto.RegisterIpfixServer(s, &rpcHandler{opt: h.opt})
 
 	h.srv = s
 

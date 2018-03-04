@@ -13,6 +13,11 @@ message Place {
 
 message GetLocationRequest {
 	string ip_address = 1;
+	string language = 2;
+}
+
+message Location {
+	string ip_address = 1;
 	Place country = 2;
 	Place region = 3;
 	string city = 4;
@@ -21,10 +26,6 @@ message GetLocationRequest {
 	float latitude = 7;
 	float longitude = 8;
 	int64 metro_code = 9;
-}
-
-message Location {
-	string ip_address = 1;
 }
 
 service Ipfix {

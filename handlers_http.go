@@ -32,7 +32,7 @@ func ipAddressHandler(opt options, w http.ResponseWriter, r *http.Request) error
 		return nil
 	}
 
-	q := &geoipQuery{}
+	q := geoipQuery{}
 	err := opt.DB.Lookup(ip, &q)
 	if err != nil {
 		return errors.Wrapf(err, "Cannot retrieve geoip information for %s", rawIP)
