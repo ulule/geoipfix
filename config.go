@@ -17,13 +17,18 @@ type corsConfig struct {
 	MaxAge           int      `json:"max_age"`
 }
 
+type serverRPCConfig struct {
+	Port int `json:"port"`
+}
+
 type serverHTTPConfig struct {
 	Port int        `json:"port"`
 	Cors corsConfig `json:"cors"`
 }
 
 type serverConfig struct {
-	HTTP serverHTTPConfig `json:"http"`
+	HTTP *serverHTTPConfig `json:"http"`
+	RPC  *serverRPCConfig  `json:"rpc"`
 }
 
 // config is ipfix config
