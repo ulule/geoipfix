@@ -6,14 +6,27 @@ option java_outer_classname = "IpfixProto";
 
 package proto;
 
-message GetLocationRequest {
-  string ip_address = 1;
+message Place {
+	string code = 1;
+	string name = 2;
 }
 
-message GetLocationResponse {
-  string ip_address = 1;
+message GetLocationRequest {
+	string ip_address = 1;
+	Place country = 2;
+	Place region = 3;
+	string city = 4;
+	string zip_code = 5;
+	string time_zone = 6;
+	float latitude = 7;
+	float longitude = 8;
+	int64 metro_code = 9;
+}
+
+message Location {
+	string ip_address = 1;
 }
 
 service Ipfix {
-  rpc GetLocation(GetLocationRequest) returns (GetLocationResponse) {}
+	rpc GetLocation(GetLocationRequest) returns (Location) {}
 }

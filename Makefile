@@ -11,7 +11,7 @@ compiler = $(shell go version)
 
 test: unit
 
-gen-proto:
+generate:
 	protoc --gofast_out=plugins=grpc:. proto/ipfix.proto
 
 dependencies:
