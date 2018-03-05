@@ -56,8 +56,11 @@
     "logging",
     "logging/zap",
     "logging/zap/ctxzap",
+    "retry",
     "tags",
-    "tags/zap"
+    "tags/zap",
+    "util/backoffutils",
+    "util/metautils"
   ]
   revision = "eb23b08d08bbe930113a6512a7a829050341448c"
 
@@ -191,6 +194,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "16b7de2563f03b81c4627796a1a2e9ca35eacdc7d1d04326bd8c831f8af8e75a"
+  inputs-digest = "ffeb2a92b76d0f1f6c46c9371b7daffffe398bfd92ccc9e67087121083993fff"
   solver-name = "gps-cdcl"
   solver-version = 1
