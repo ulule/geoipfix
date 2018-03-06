@@ -18,7 +18,7 @@ func main() {
 	var ipAddress string
 	var maxRetry uint
 
-	flag.StringVar(&serverAddr, "server.addr", "127.0.0.1:33001", "rpc server addr")
+	flag.StringVar(&serverAddr, "server-addr", "127.0.0.1:33001", "rpc server addr")
 	flag.StringVar(&ipAddress, "ip", "127.0.0.1", "ip address")
 	flag.UintVar(&maxRetry, "retries", 3, "max retries")
 	flag.Parse()

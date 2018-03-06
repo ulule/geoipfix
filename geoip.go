@@ -1,3 +1,6 @@
+// This code has been taken from freegeoip repository
+// it can be found here: https://github.com/fiorix/freegeoip/blob/master/apiserver/api.go
+
 package ipfix
 
 import (

@@ -32,12 +32,17 @@ Configuration
 
 Configuration should be stored in a readable file and in JSON format.
 
+A complete example of the configuration file with RPC+HTTP would be:
+
 ``config.json``
 
 .. code-block:: json
 
     {
         "server": {
+            "rpc": {
+                "port": 33001,
+            },
             "http": {
                 "port": 3001,
                 "cors": {
@@ -50,11 +55,30 @@ Configuration should be stored in a readable file and in JSON format.
         "database_path": "./GeoLite2-City.mmdb.gz"
     }
 
-You should download first locally the GeoLite_ database because the service
+Be careful, you should download first locally the GeoLite_ database because the service
 will be unavailable until it will download the database.
 
+HTTP server
+===========
+
+The HTTP server is based on chi_.
+
+It's disabled by default, you can activate it by adding the `http` section to `server`.
+
+``config.json``
+
+.. code-block:: json
+
+    {
+        "server": {
+            "http": {
+                "port": 3001,
+            }
+        }
+    }
+
 CORS
-====
+----
 
 ipfix supports CORS headers customization in your config file.
 
@@ -69,6 +93,31 @@ for example:
       "allowed_origins": ["*.ulule.com"],
       "allowed_methods": ["GET", "HEAD"]
     }
+
+RPC server
+===========
+
+The RPC server is based on grpc_.
+
+It's disabled by default, you can activate it by adding the `rpc` section to `server`.
+
+``config.json``
+
+.. code-block:: json
+
+    {
+        "server": {
+            "http": {
+                "port": 33001,
+            }
+        }
+    }
+
+You can found a client example in the `repository <examples/client/main.go`_ and execute it:
+
+::
+
+    go run examples/client/main.go -ip {YOUR_IP_ADDRESS} -server-addr {RPC_ADDRESS}
 
 Usage
 =====
@@ -116,6 +165,8 @@ Then launch it in the ipfix directory:
 .. _freegeoip: https://github.com/fiorix/freegeoip
 .. _maxmind: https://www.maxmind.com/fr/home
 .. _modd: https://github.com/cortesi/modd
+.. _chi: https://github.com/go-chi/chi
+.. _grpc: https://grpc.io/
 
 Dang, what's this name?
 =======================
