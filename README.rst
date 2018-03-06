@@ -1,7 +1,7 @@
 ipfix
 =====
 
-ipfix is a dead simple Go webservice to retrieve geolocation information
+ipfix is a Go service (HTTP+RPC) to retrieve geolocation information
 about an ip address with freegeoip_ helpers.
 
 We are using bindings from the maxmind_ database.
