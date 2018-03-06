@@ -14,6 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
+type handler func(w http.ResponseWriter, r *http.Request) error
+
 // httpServer is an HTTP server.
 type httpServer struct {
 	srv     http.Server
@@ -37,7 +39,7 @@ func newHTTPServer(cfg serverHTTPConfig, opts ...option) *httpServer {
 // handle handles an handler and captures error.
 func (h *httpServer) handle(f handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := f(h.opt, w, r)
+		err := f(w, r)
 		if err != nil {
 			h.recover.Handle(err)
 		}
@@ -73,8 +75,11 @@ func (h *httpServer) Init() error {
 			"compiler":   Compiler,
 		})
 	})
-	r.Get("/json/{ipAddress}", h.handle(ipAddressHandler))
-	r.Get("/json/", h.handle(ipAddressHandler))
+
+	handler := httpHandler{h.opt}
+
+	r.Get("/json/{ipAddress}", h.handle(handler.GetLocation))
+	r.Get("/json/", h.handle(handler.GetLocation))
 
 	h.mux = r
 
