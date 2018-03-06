@@ -113,7 +113,7 @@ It's disabled by default, you can activate it by adding the `rpc` section to `se
         }
     }
 
-You can found a client example in the `repository <examples/client/main.go`_ and execute it:
+You can found a client example in the `repository <examples/client/main.go>`_ and execute it:
 
 ::
 
