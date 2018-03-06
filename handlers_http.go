@@ -11,29 +11,31 @@ import (
 	"github.com/pkg/errors"
 )
 
-// handler is an http.Handler with ipfix options.
-type handler func(opt options, w http.ResponseWriter, r *http.Request) error
+type httpHandler struct {
+	options
+}
 
-// ipAddressHandler retrieves the IP from request.
-func ipAddressHandler(opt options, w http.ResponseWriter, r *http.Request) error {
+// GetLocation retrieves the IP from request.
+func (h *httpHandler) GetLocation(w http.ResponseWriter, r *http.Request) error {
 	rawIP := chi.URLParam(r, "ipAddress")
 	if rawIP == "" {
 		rawIP = r.RemoteAddr
 	}
 
-	opt.Logger.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
+	log := h.Logger.With(zap.String("ip_address", rawIP))
+	log.Info("Retrieve IP Address from request", zap.String("ip_address", rawIP))
 
 	ip := net.ParseIP(rawIP)
 	if ip == nil {
-		opt.Logger.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
+		log.Error("IP Address cannot be parsed", zap.String("ip_address", rawIP))
 
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 
 		return nil
 	}
 
-	q := &geoipQuery{}
-	err := opt.DB.Lookup(ip, &q)
+	q := geoipQuery{}
+	err := h.DB.Lookup(ip, &q)
 	if err != nil {
 		return errors.Wrapf(err, "Cannot retrieve geoip information for %s", rawIP)
 	}

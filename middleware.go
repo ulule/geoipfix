@@ -50,15 +50,15 @@ func (m *recoverMiddleware) Handler(next http.Handler) http.Handler {
 }
 
 func newLoggerMiddleware(logger *zap.Logger) func(next http.Handler) http.Handler {
-	return middleware.RequestLogger(&StructuredLogger{logger})
+	return middleware.RequestLogger(&structuredLogger{logger})
 }
 
-type StructuredLogger struct {
+type structuredLogger struct {
 	Logger *zap.Logger
 }
 
-func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &StructuredLoggerEntry{Logger: l.Logger}
+func (l *structuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
+	entry := &structuredLoggerEntry{Logger: l.Logger}
 
 	fields := []zapcore.Field{zap.String("ts", time.Now().UTC().Format(time.RFC1123))}
 
@@ -87,11 +87,11 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	return entry
 }
 
-type StructuredLoggerEntry struct {
+type structuredLoggerEntry struct {
 	Logger *zap.Logger
 }
 
-func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) {
+func (l *structuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) {
 	l.Logger = l.Logger.With(
 		zap.Int("res.status", status),
 		zap.Int("res.bytes_length", bytes),
@@ -100,7 +100,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) 
 	l.Logger.Info("request complete")
 }
 
-func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
+func (l *structuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	l.Logger = l.Logger.With(
 		zap.String("stack", string(stack)),
 		zap.String("panic", fmt.Sprintf("%+v", v)),

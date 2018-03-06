@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.ipfix";
+option java_outer_classname = "IpfixProto";
+
+package proto;
+
+message Place {
+	string code = 1;
+	string name = 2;
+}
+
+message GetLocationRequest {
+	string ip_address = 1;
+	string language = 2;
+}
+
+message Location {
+	string ip_address = 1;
+	Place country = 2;
+	Place region = 3;
+	string city = 4;
+	string zip_code = 5;
+	string time_zone = 6;
+	float latitude = 7;
+	float longitude = 8;
+	int64 metro_code = 9;
+}
+
+service Ipfix {
+	rpc GetLocation(GetLocationRequest) returns (Location) {}
+}
