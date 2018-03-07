@@ -27,10 +27,19 @@ func newRPCServer(cfg serverRPCConfig, opts ...option) *rpcServer {
 	opt := newOptions(opts...)
 	opt.Logger = opt.Logger.With(zap.String("server", "rpc"))
 
-	return &rpcServer{
+	srv := &rpcServer{
 		cfg: cfg,
-		opt: opt,
 	}
+
+	opt.Logger = opt.Logger.With(zap.String("server", srv.Name()))
+
+	srv.opt = opt
+
+	return srv
+}
+
+func (h *rpcServer) Name() string {
+	return "rpc"
 }
 
 // Init initializes rpc server instance.
@@ -59,7 +68,7 @@ func (h *rpcServer) Serve(ctx context.Context) error {
 		return err
 	}
 
-	h.opt.Logger.Info("Launch RPC server", zap.String("addr", addr))
+	h.opt.Logger.Info("Launch server", zap.String("addr", addr))
 
 	err = h.srv.Serve(lis)
 	if err != nil {
@@ -73,7 +82,7 @@ func (h *rpcServer) Serve(ctx context.Context) error {
 func (h *rpcServer) Shutdown() error {
 	h.srv.GracefulStop()
 
-	h.opt.Logger.Info("RPC server shutdown")
+	h.opt.Logger.Info("Server shutdown")
 
 	return nil
 }
