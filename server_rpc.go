@@ -25,7 +25,6 @@ type rpcServer struct {
 
 func newRPCServer(cfg serverRPCConfig, opts ...option) *rpcServer {
 	opt := newOptions(opts...)
-	opt.Logger = opt.Logger.With(zap.String("server", "rpc"))
 
 	srv := &rpcServer{
 		cfg: cfg,
