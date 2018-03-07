@@ -26,12 +26,20 @@ type httpServer struct {
 // newHTTPServer retrieves a new HTTPServer instance.
 func newHTTPServer(cfg serverHTTPConfig, opts ...option) *httpServer {
 	opt := newOptions(opts...)
-	opt.Logger = opt.Logger.With(zap.String("server", "http"))
 
-	return &httpServer{
+	srv := &httpServer{
 		cfg: cfg,
-		opt: opt,
 	}
+
+	opt.Logger = opt.Logger.With(zap.String("server", srv.Name()))
+
+	srv.opt = opt
+
+	return srv
+}
+
+func (h *httpServer) Name() string {
+	return "http"
 }
 
 // handle handles an handler and captures error.
@@ -89,7 +97,7 @@ func (h *httpServer) Serve(ctx context.Context) error {
 		Addr:    addr,
 		Handler: chi.ServerBaseContext(ctx, h.mux),
 	}
-	h.opt.Logger.Info("Launch HTTP server", zap.String("addr", addr))
+	h.opt.Logger.Info("Launch server", zap.String("addr", addr))
 
 	return h.srv.ListenAndServe()
 }
@@ -101,7 +109,7 @@ func (h *httpServer) Shutdown() error {
 
 	err := h.srv.Shutdown(ctx)
 
-	h.opt.Logger.Info("HTTP server shutdown")
+	h.opt.Logger.Info("Server shutdown")
 
 	return err
 }
