@@ -6,17 +6,17 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/ulule/ipfix"
+	"github.com/ulule/geoipfix"
 )
 
 // Run runs the application.
 func Run() {
 	app := cli.NewApp()
-	app.Name = "ipfix"
+	app.Name = "geoipfix"
 	app.Author = "thoas"
 	app.Email = "florent@ulule.com"
 	app.Usage = "A webservice to retrieve geolocation information from an ip address"
-	app.Version = fmt.Sprintf("%s [git:%s:%s]\ncompiled using %s at %s)", ipfix.Version, ipfix.Branch, ipfix.Revision, ipfix.Compiler, ipfix.BuildTime)
+	app.Version = fmt.Sprintf("%s [git:%s:%s]\ncompiled using %s at %s)", geoipfix.Version, geoipfix.Branch, geoipfix.Revision, geoipfix.Compiler, geoipfix.BuildTime)
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "config, c",
@@ -30,7 +30,7 @@ func Run() {
 			ShortName: "v",
 			Usage:     "Retrieve the version number",
 			Action: func(c *cli.Context) {
-				fmt.Printf("ipfix %s\n", ipfix.Version)
+				fmt.Printf("geoipfix %s\n", geoipfix.Version)
 			},
 		},
 	}
@@ -47,7 +47,7 @@ func Run() {
 			os.Exit(1)
 		}
 
-		err := ipfix.Run(config)
+		err := geoipfix.Run(config)
 
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)

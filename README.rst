@@ -1,7 +1,7 @@
-ipfix
+geoipfix
 =====
 
-ipfix is a Go service (HTTP+RPC) to retrieve geolocation information
+geoipfix is a Go service (HTTP+RPC) to retrieve geolocation information
 about an ip address with freegeoip_ helpers.
 
 We are using bindings from the maxmind_ database.
@@ -19,11 +19,11 @@ Build it locally
 
 ::
 
-    git clone https://github.com/ulule/ipfix.git
+    git clone https://github.com/ulule/geoipfix.git
 
 4. Run ``make build``
 
-You have now a binary version of ipfix in the ``bin`` directory which
+You have now a binary version of geoipfix in the ``bin`` directory which
 fits perfectly with your architecture.
 
 Build it using Docker
@@ -35,7 +35,7 @@ If you don't want to install Go and Docker_ is installed on your computer
 
     make docker-build
 
-You will have a binary version of ipfix compiled for linux in the ``bin`` directory.
+You will have a binary version of geoipfix compiled for linux in the ``bin`` directory.
 
 Configuration
 =============
@@ -51,7 +51,7 @@ A complete example of the configuration file with RPC+HTTP would be:
     {
         "server": {
             "rpc": {
-                "port": 33001,
+                "port": 33001
             },
             "http": {
                 "port": 3001,
@@ -90,7 +90,7 @@ It's disabled by default, you can activate it by adding the `http` section to `s
 CORS
 ----
 
-ipfix supports CORS headers customization in your config file.
+geoipfix supports CORS headers customization in your config file.
 
 To enable this feature, set ``allowed_origins`` and ``allowed_methods``,
 for example:
@@ -136,13 +136,13 @@ When your configuration is done, you can start the service as follow:
 
 ::
 
-    ipfix -c config.json
+    geoipfix -c config.json
 
 or using an environment variable:
 
 ::
 
-    IPFIX_CONF=/path/to/config.json ipfix
+    IPFIX_CONF=/path/to/config.json geoipfix
 
 By default, this will run the application on port 3001 and can be accessed by visiting:
 
@@ -156,7 +156,7 @@ To see a list of all available options, run:
 
 ::
 
-    ipfix --help
+    geoipfix --help
 
 Development
 ===========
@@ -169,7 +169,7 @@ Install it:
 
     go get github.com/cortesi/modd/cmd/modd
 
-Then launch it in the ipfix directory:
+Then launch it in the geoipfix directory:
 
 ::
 

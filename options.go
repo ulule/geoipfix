@@ -1,4 +1,4 @@
-package ipfix
+package geoipfix
 
 import (
 	"github.com/fiorix/freegeoip"
@@ -8,7 +8,7 @@ import (
 // option is a functional option.
 type option func(*options)
 
-// NewOptions initializes ipfix options.
+// NewOptions initializes geoipfix options.
 func newOptions(opts ...option) options {
 	opt := options{}
 	for _, o := range opts {
@@ -17,7 +17,7 @@ func newOptions(opts ...option) options {
 	return opt
 }
 
-// options are ipfix options.
+// options are geoipfix options.
 type options struct {
 	DB     *freegeoip.DB
 	Logger *zap.Logger

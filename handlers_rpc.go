@@ -1,11 +1,11 @@
-package ipfix
+package geoipfix
 
 import (
 	"context"
 	"net"
 
 	"github.com/pkg/errors"
-	"github.com/ulule/ipfix/proto"
+	"github.com/ulule/geoipfix/proto"
 	"go.uber.org/zap"
 )
 

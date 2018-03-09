@@ -1,6 +1,6 @@
-package ipfix
+package geoipfix
 
-import "github.com/ulule/ipfix/proto"
+import "github.com/ulule/geoipfix/proto"
 
 func recordToProto(r *record) *proto.Location {
 	loc := &proto.Location{

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	"github.com/ulule/ipfix/proto"
+	"github.com/ulule/geoipfix/proto"
 	"golang.org/x/net/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -23,7 +23,7 @@ func main() {
 	flag.UintVar(&maxRetry, "retries", 3, "max retries")
 	flag.Parse()
 
-	tr := trace.New("ipfix.Client", "GetLocation")
+	tr := trace.New("geoipfix.Client", "GetLocation")
 	defer tr.Finish()
 
 	conn, err := grpc.Dial(serverAddr,
@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := proto.NewIpfixClient(conn)
+	c := proto.NewGeoipfixClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

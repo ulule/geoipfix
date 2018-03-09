@@ -1,8 +1,8 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.grpc.ipfix";
-option java_outer_classname = "IpfixProto";
+option java_package = "io.grpc.geoipfix";
+option java_outer_classname = "GeoipfixProto";
 
 package proto;
 
@@ -28,6 +28,6 @@ message Location {
 	int64 metro_code = 9;
 }
 
-service Ipfix {
+service Geoipfix {
 	rpc GetLocation(GetLocationRequest) returns (Location) {}
 }

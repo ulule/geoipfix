@@ -1,11 +1,11 @@
-package ipfix
+package geoipfix
 
 import (
 	"github.com/fiorix/freegeoip"
 	"go.uber.org/zap"
 )
 
-// application is the ipfix application.
+// application is the geoipfix application.
 type application struct {
 	DB     *freegeoip.DB
 	Logger *zap.Logger

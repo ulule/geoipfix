@@ -1,4 +1,4 @@
-package ipfix
+package geoipfix
 
 import (
 	"encoding/json"
@@ -31,7 +31,7 @@ type serverConfig struct {
 	RPC  *serverRPCConfig  `json:"rpc"`
 }
 
-// config is ipfix config
+// config is geoipfix config
 type config struct {
 	Debug        bool         `json:"debug"`
 	DatabasePath string       `json:"database_path"`

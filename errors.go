@@ -1,1 +1,1 @@
-package ipfix
+package geoipfix

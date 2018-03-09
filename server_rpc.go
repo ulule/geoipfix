@@ -1,4 +1,4 @@
-package ipfix
+package geoipfix
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/ulule/ipfix/proto"
+	"github.com/ulule/geoipfix/proto"
 )
 
 // rpcServer is an RPC server.
@@ -51,7 +51,7 @@ func (h *rpcServer) Init() error {
 			grpc_zap.UnaryServerInterceptor(h.opt.Logger),
 		),
 	)
-	proto.RegisterIpfixServer(s, &rpcHandler{h.opt})
+	proto.RegisterGeoipfixServer(s, &rpcHandler{h.opt})
 
 	h.srv = s
 

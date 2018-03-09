@@ -1,5 +1,5 @@
 FROM stretch-slim
 
-ADD bin/ipfix /ipfix
+ADD bin/geoipfix /geoipfix
 
-CMD ["/ipfix"]
+CMD ["/geoipfix"]

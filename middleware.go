@@ -1,27 +1,27 @@
-package ipfix
+package geoipfix
 
 import (
-	"time"
 	"fmt"
 	"net/http"
 	"os"
 	"runtime/debug"
+	"time"
 
+	"github.com/go-chi/chi/middleware"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"github.com/go-chi/chi/middleware"
 )
 
 type middlewareHandler = func(next http.Handler) http.Handler
 
 type recoverMiddleware struct {
-	debug bool
+	debug  bool
 	logger *zap.Logger
 }
 
 func newRecoverMiddleware(debug bool, logger *zap.Logger) *recoverMiddleware {
 	return &recoverMiddleware{
-		debug: debug,
+		debug:  debug,
 		logger: logger,
 	}
 }
@@ -95,7 +95,7 @@ func (l *structuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) 
 	l.Logger = l.Logger.With(
 		zap.Int("res.status", status),
 		zap.Int("res.bytes_length", bytes),
-		zap.Float64("res.elapsed_ms", float64(elapsed.Nanoseconds()) / 1000000.0))
+		zap.Float64("res.elapsed_ms", float64(elapsed.Nanoseconds())/1000000.0))
 
 	l.Logger.Info("request complete")
 }
