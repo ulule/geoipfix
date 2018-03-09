@@ -21,7 +21,7 @@ func Run() {
 		cli.StringFlag{
 			Name:   "config, c",
 			Usage:  "Config file path",
-			EnvVar: "IPFIX_CONF",
+			EnvVar: "GEOIPFIX_CONF",
 		},
 	}
 	app.Commands = []cli.Command{

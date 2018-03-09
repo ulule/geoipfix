@@ -142,7 +142,7 @@ or using an environment variable:
 
 ::
 
-    IPFIX_CONF=/path/to/config.json geoipfix
+    GEOIPFIX_CONF=/path/to/config.json geoipfix
 
 By default, this will run the application on port 3001 and can be accessed by visiting:
 
@@ -173,7 +173,7 @@ Then launch it in the geoipfix directory:
 
 ::
 
-    IPFIX_CONF=config.json make live
+    GEOIPFIX_CONF=config.json make live
 
 
 .. _GOPATH: http://golang.org/doc/code.html#GOPATH

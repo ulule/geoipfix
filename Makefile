@@ -18,7 +18,7 @@ dependencies:
 	dep ensure -v
 
 run:
-	IPFIX_CONF=`pwd`/config.json ./bin/geoipfix
+	GEOIPFIX_CONF=`pwd`/config.json ./bin/geoipfix
 
 live:
 	@modd
