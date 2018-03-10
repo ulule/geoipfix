@@ -1,4 +1,4 @@
-FROM stretch-slim
+FROM debian:stretch-slim
 
 ADD bin/geoipfix /geoipfix
 

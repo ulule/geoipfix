@@ -1,0 +1,21 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+        "server": {
+            "rpc": {
+                "port": 33001
+            },
+            "http": {
+                "port": 3001,
+                "cors": {
+                    "allowed_origins": ["*.ulule.com"],
+                    "allowed_methods": ["GET", "HEAD", "POST"],
+                    "allowed_headers": ["Origin", "Accept", "Content-Type", "X-Requested-With"]
+                }
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  name: geoipfix-config
