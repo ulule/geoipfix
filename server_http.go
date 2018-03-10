@@ -75,12 +75,24 @@ func (h *httpServer) Init() error {
 	r.Use(newLoggerMiddleware(h.opt.Logger))
 
 	r.Get("/sys/health", func(w http.ResponseWriter, r *http.Request) {
+		headers := map[string]string{}
+
+		for k, v := range r.Header {
+			if k == "Cookie" {
+				continue
+			}
+
+			headers[k] = v[0]
+		}
+
 		render.DefaultResponder(w, r, render.M{
-			"status":     "OK",
-			"version":    Version,
-			"revision":   Revision,
-			"build_time": BuildTime,
-			"compiler":   Compiler,
+			"remote_addr": r.RemoteAddr,
+			"headers":     headers,
+			"status":      "OK",
+			"version":     Version,
+			"revision":    Revision,
+			"build_time":  BuildTime,
+			"compiler":    Compiler,
 		})
 	})
 
