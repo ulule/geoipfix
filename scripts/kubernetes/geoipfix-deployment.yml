@@ -4,6 +4,7 @@ metadata:
   name: geoipfix
   labels:
     app: geoipfix
+    sha: "${GEOIPFIX_VERSION}"
 spec:
   replicas: 3
   template:

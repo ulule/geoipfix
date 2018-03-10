@@ -6,6 +6,7 @@ metadata:
     app: geoipfix
 spec:
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
   - port: 80
     targetPort: http-server
