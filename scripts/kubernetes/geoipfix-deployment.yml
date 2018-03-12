@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: geoipfix
+  labels:
+    app: geoipfix
+    sha: "${GEOIPFIX_VERSION}"
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: geoipfix
+    spec:
+      volumes:
+        - name: geoipfix-volume
+          configMap:
+            name: geoipfix-config
+      containers:
+      - name: geoipfix
+        image: gcr.io/${GCLOUD_PROJECT_ID}/geoipfix:${GEOIPFIX_VERSION}
+        imagePullPolicy: Always
+        env:
+        - name: GEOIPFIX_CONF
+          value: "/etc/geoipfix/config.json"
+        volumeMounts:
+        - name: geoipfix-volume
+          mountPath: /etc/geoipfix
+        ports:
+        - name: http-server
+          containerPort: 3001
+        - name: rpc-server
+          containerPort: 33001
+
+        readinessProbe:
+          httpGet:
+            path: /sys/health
+            port: 3001
+
+        livenessProbe:
+          httpGet:
+            path: /sys/health
+            port: 3001
