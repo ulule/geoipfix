@@ -5,7 +5,7 @@ metadata:
   labels:
     app: geoipfix
 spec:
-  type: LoadBalancer
+  type: NodePort
   externalTrafficPolicy: Local
   ports:
   - port: 80
