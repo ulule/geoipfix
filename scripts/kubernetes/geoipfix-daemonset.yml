@@ -1,0 +1,32 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: geoipfix-downloader
+spec:
+  selector:
+    matchLabels:
+      daemon: geoipfix-downloader
+  template:
+    metadata:
+      labels:
+        daemon: geoipfix-downloader
+      name: geoipfix-downloader
+    spec:
+      containers:
+        - name: geoipfix-downloader
+          image: gcr.io/ulule-services/geoipfix-downloader:0.1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: geoipfix-downloader-volume
+              mountPath: /usr/share/geoip
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+
+      volumes:
+        - name: geoipfix-downloader-volume
+          emptyDir: {}
+      
+      terminationGracePeriodSeconds: 5

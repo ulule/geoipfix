@@ -26,6 +26,9 @@ spec:
         volumeMounts:
         - name: geoipfix-volume
           mountPath: /etc/geoipfix
+        - name: geoipfix-downloader-volume
+          mountPath: "/usr/share/geoip"
+          readOnly: true
         ports:
         - name: http-server
           containerPort: 3001
