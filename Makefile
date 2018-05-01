@@ -2,6 +2,7 @@ ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION=$(awk '/Version/ { gsub("\"", ""); print $NF }' ${ROOT_DIR}/application/constants.go)
 
 BIN_DIR = $(ROOT_DIR)/bin
+SHARE_DIR = $(ROOT_DIR)/share
 APP_DIR = /go/src/github.com/ulule/geoipfix
 
 branch = $(shell git rev-parse --abbrev-ref HEAD)
@@ -43,6 +44,13 @@ build-static:
 		-X 'geoipfix.Revision=$(commit)' \
 		-X 'geoipfix.BuildTime=$(now)' \
 		-X 'geoipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/geoipfix ./cmd/main.go)
+
+
+docker-build-geoip:
+	@(echo "-> Preparing builder...")
+	@(docker build -t geoipfix-geoip -f Dockerfile.geoip .)
+	@(mkdir -p $(SHARE_DIR))
+	@(docker run --rm -v $(SHARE_DIR):/usr/share/geoip/ geoipfix-geoip)
 
 docker-build:
 	@(echo "-> Preparing builder...")
