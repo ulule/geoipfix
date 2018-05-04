@@ -2,7 +2,8 @@ apiVersion: v1
 data:
   config.json: |
     {
-      "database_path": "/usr/share/geoip/GeoLite2-City.tar.gz",
+      "debug": true,
+      "database_path": "/usr/share/geoip/GeoLite2-City.mmdb.gz",
       "server": {
           "rpc": {
               "port": 33001
