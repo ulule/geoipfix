@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-app
+  labels:
+    app: hello-app
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hello-app
+    spec:
+      containers:
+      - name: hello-app
+        image: gcr.io/google-samples/hello-app:1.0
+        imagePullPolicy: Always
+        ports:
+        - name: http-server
+          containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-app
+  labels:
+    app: hello-app
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  ports:
+  - port: 8080
+    targetPort: http-server
+  selector:
+    app: hello-app
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-app-http
+spec:
+  backend:
+    serviceName: hello-app
+    servicePort: 8080

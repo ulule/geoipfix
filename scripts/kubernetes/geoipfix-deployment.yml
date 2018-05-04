@@ -6,7 +6,7 @@ metadata:
     app: geoipfix
     sha: "${GEOIPFIX_VERSION}"
 spec:
-  replicas: 3
+  replicas: 2
   template:
     metadata:
       labels:
@@ -16,31 +16,39 @@ spec:
         - name: geoipfix-volume
           configMap:
             name: geoipfix-config
-      containers:
-      - name: geoipfix
-        image: gcr.io/${GCLOUD_PROJECT_ID}/geoipfix:${GEOIPFIX_VERSION}
-        imagePullPolicy: Always
-        env:
-        - name: GEOIPFIX_CONF
-          value: "/etc/geoipfix/config.json"
-        volumeMounts:
-        - name: geoipfix-volume
-          mountPath: /etc/geoipfix
         - name: geoipfix-downloader-volume
-          mountPath: "/usr/share/geoip"
-          readOnly: true
-        ports:
-        - name: http-server
-          containerPort: 3001
-        - name: rpc-server
-          containerPort: 33001
+          emptyDir: {}
+      containers:
+        - name: geoipfix-downloader
+          image: gcr.io/ulule-services/geoipfix-downloader:0.1.1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: geoipfix-downloader-volume
+              mountPath: /usr/share/geoip
+        - name: geoipfix
+          image: gcr.io/${GCLOUD_PROJECT_ID}/geoipfix:${GEOIPFIX_VERSION}
+          imagePullPolicy: Always
+          env:
+          - name: GEOIPFIX_CONF
+            value: "/etc/geoipfix/config.json"
+          volumeMounts:
+          - name: geoipfix-volume
+            mountPath: /etc/geoipfix
+          - name: geoipfix-downloader-volume
+            mountPath: /usr/share/geoip
+            readOnly: true
+          ports:
+          - name: http-server
+            containerPort: 3001
+          - name: rpc-server
+            containerPort: 33001
 
-        readinessProbe:
-          httpGet:
-            path: /sys/health
-            port: 3001
+          readinessProbe:
+            httpGet:
+              path: /sys/health
+              port: 3001
 
-        livenessProbe:
-          httpGet:
-            path: /sys/health
-            port: 3001
+          livenessProbe:
+            httpGet:
+              path: /sys/health
+              port: 3001
