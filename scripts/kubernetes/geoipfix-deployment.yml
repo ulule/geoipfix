@@ -16,15 +16,7 @@ spec:
         - name: geoipfix-volume
           configMap:
             name: geoipfix-config
-        - name: geoipfix-downloader-volume
-          emptyDir: {}
       containers:
-        - name: geoipfix-downloader
-          image: gcr.io/ulule-services/geoipfix-downloader:0.1.2
-          imagePullPolicy: Always
-          volumeMounts:
-            - name: geoipfix-downloader-volume
-              mountPath: /usr/share/geoip
         - name: geoipfix
           image: gcr.io/${GCLOUD_PROJECT_ID}/geoipfix:${GEOIPFIX_VERSION}
           imagePullPolicy: Always
@@ -34,9 +26,6 @@ spec:
           volumeMounts:
           - name: geoipfix-volume
             mountPath: /etc/geoipfix
-          - name: geoipfix-downloader-volume
-            mountPath: /usr/share/geoip
-            readOnly: true
           ports:
           - name: http-server
             containerPort: 3001
