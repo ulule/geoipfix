@@ -46,12 +46,6 @@ build-static:
 		-X 'geoipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/geoipfix ./cmd/main.go)
 
 
-docker-build-downloader:
-	@(echo "-> Preparing builder...")
-	@(docker build -t geoipfix-downloader -f Dockerfile.downloader .)
-	@(mkdir -p $(SHARE_DIR))
-	@(docker run --rm -v $(SHARE_DIR):/usr/share/geoip/ geoipfix-downloader)
-
 docker-build:
 	@(echo "-> Preparing builder...")
 	@(docker build -t geoipfix-builder -f Dockerfile.build .)
