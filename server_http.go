@@ -74,6 +74,9 @@ func (h *httpServer) Init() error {
 	r.Use(middleware.RequestID)
 	r.Use(newLoggerMiddleware(h.opt.Logger))
 
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		render.Status(r, http.StatusOK)
+	})
 	r.Get("/sys/health", func(w http.ResponseWriter, r *http.Request) {
 		headers := map[string]string{}
 
