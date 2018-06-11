@@ -5,7 +5,7 @@ import (
 )
 
 // Version is the current application version
-const Version = "0.3"
+const Version = "0.1.0"
 
 // DefaultPort is the default server port
 const DefaultPort = 3001
