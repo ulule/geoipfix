@@ -33,17 +33,21 @@ all: geoipfix
 build:
 	@(echo "-> Compiling geoipfix binary")
 	@(mkdir -p $(BIN_DIR))
-	@(go build -o $(BIN_DIR)/geoipfix ./cmd/main.go)
+	@(go build -ldflags "\
+		-X 'github.com/ulule/geoipfix.Branch=$(branch)' \
+		-X 'github.com/ulule/geoipfix.Revision=$(commit)' \
+		-X 'github.com/ulule/geoipfix.BuildTime=$(now)' \
+		-X 'github.com/ulule/geoipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/geoipfix ./cmd/main.go)
 	@(echo "-> geoipfix binary created")
 
 build-static:
 	@(echo "-> Creating statically linked binary...")
 	@(mkdir -p $(BIN_DIR))
 	@(CGO_ENABLED=0 go build -ldflags "\
-		-X 'geoipfix.Branch=$(branch)' \
-		-X 'geoipfix.Revision=$(commit)' \
-		-X 'geoipfix.BuildTime=$(now)' \
-		-X 'geoipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/geoipfix ./cmd/main.go)
+		-X 'github.com/ulule/geoipfix.Branch=$(branch)' \
+		-X 'github.com/ulule/geoipfix.Revision=$(commit)' \
+		-X 'github.com/ulule/geoipfix.BuildTime=$(now)' \
+		-X 'github.com/ulule/geoipfix.Compiler=$(compiler)'" -a -installsuffix cgo -o $(BIN_DIR)/geoipfix ./cmd/main.go)
 
 
 docker-build:
