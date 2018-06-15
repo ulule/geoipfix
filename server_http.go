@@ -60,17 +60,20 @@ func (h *httpServer) Init() error {
 
 	h.recover = newRecoverMiddleware(h.opt.Debug, h.opt.Logger)
 
-	cors := cors.New(cors.Options{
-		AllowedOrigins:   h.cfg.Cors.AllowedOrigins,
-		AllowedMethods:   h.cfg.Cors.AllowedMethods,
-		AllowedHeaders:   h.cfg.Cors.AllowedHeaders,
-		ExposedHeaders:   h.cfg.Cors.ExposedHeaders,
-		AllowCredentials: h.cfg.Cors.AllowCredentials,
-		MaxAge:           h.cfg.Cors.MaxAge,
-	})
 	r.Use(h.recover.Handler)
 	r.Use(middleware.RealIP)
-	r.Use(cors.Handler)
+
+	if h.cfg.Cors != nil {
+		cors := cors.New(cors.Options{
+			AllowedOrigins:   h.cfg.Cors.AllowedOrigins,
+			AllowedMethods:   h.cfg.Cors.AllowedMethods,
+			AllowedHeaders:   h.cfg.Cors.AllowedHeaders,
+			ExposedHeaders:   h.cfg.Cors.ExposedHeaders,
+			AllowCredentials: h.cfg.Cors.AllowCredentials,
+			MaxAge:           h.cfg.Cors.MaxAge,
+		})
+		r.Use(cors.Handler)
+	}
 	r.Use(middleware.RequestID)
 	r.Use(newLoggerMiddleware(h.opt.Logger))
 

@@ -22,8 +22,8 @@ type serverRPCConfig struct {
 }
 
 type serverHTTPConfig struct {
-	Port int        `json:"port"`
-	Cors corsConfig `json:"cors"`
+	Port int         `json:"port"`
+	Cors *corsConfig `json:"cors"`
 }
 
 type serverConfig struct {
